@@ -1,0 +1,28 @@
+{% extends 'admin_base.html' %}
+{% block title %}Update Case Status{% endblock %}
+
+{% block content %}
+<div class="form-container glass">
+    <h2 style="margin-bottom: 0.5rem;">Update Case Status</h2>
+    <p style="color: var(--text-muted); margin-bottom: 2rem;">Modify the ongoing standing of an existing case using its Database ID.</p>
+
+    <form method="POST" action="{{ url_for('update_case') }}">
+        <div class="form-group">
+            <label>Case ID</label>
+            <input type="number" name="case_id" class="form-control" placeholder="e.g., 12" required>
+            <small style="color: var(--text-muted); display: block; margin-top: 0.5rem;">*You can find the numerical case ID on the Dashboard.</small>
+        </div>
+
+        <div class="form-group">
+            <label>New Case Status</label>
+            <select name="case_status" class="form-control" required style="appearance: none; background: rgba(15, 23, 42, 0.8);">
+                <option value="Ongoing">Ongoing</option>
+                <option value="Pending">Pending</option>
+                <option value="Closed">Closed</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Save Changes</button>
+    </form>
+</div>
+{% endblock %}

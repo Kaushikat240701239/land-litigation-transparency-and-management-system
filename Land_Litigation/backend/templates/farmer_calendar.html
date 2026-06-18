@@ -1,0 +1,98 @@
+{% extends 'farmer_base.html' %}
+{% block title %}Crop Calendar — AgriLitix{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:2rem;">
+    <h1 style="font-size:2.4rem; font-weight:900; background:linear-gradient(90deg,#84cc16,#f59e0b); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">📅 Crop Calendar — Tamil Nadu 2025</h1>
+    <p style="color:var(--muted); margin-top:6px;">Season-by-season sowing, irrigation, and harvest planner aligned with Tamil Nadu's Samba, Kuruvai & Navarai cycles</p>
+</div>
+
+<!-- ═══ SEASON OVERVIEW CARDS ═══ -->
+<div style="display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; margin-bottom:2.5rem;">
+    {% set seasons = [
+        ('🌱 Kuruvai Season','Jun – Sep','Kharif Season','Early short-duration paddy cycle of Tamil Nadu. Best for Kuruvai paddy, vegetables, and maize.',
+         [('Sowing','Jun 1–30'),('Transplanting','Jul 1–15'),('Fertilizing','Jul 20 – Aug 5'),('Harvesting','Sep 15 – Oct 10')],'#16a34a','rgba(22,163,74,0.15)'),
+        ('🌾 Samba Season','Oct – Jan','Main Rabi Season','Principal paddy season of TN. Best yields for Samba paddy, groundnut, sugarcane, cotton.',
+         [('Land Preparation','Oct 1–20'),('Sowing','Oct 20 – Nov 15'),('Irrigation Peak','Nov – Dec'),('Harvesting','Jan 15 – Feb 15')],'#f59e0b','rgba(245,158,11,0.15)'),
+        ('🌿 Navarai Season','Jan – Mar','Rabi Short Cycle','Tail-end short cycle using remaining irrigation water. Best for vegetables, pulses, oilseeds.',
+         [('Sowing','Jan 15 – Feb 5'),('Growth Phase','Feb 5 – Mar 10'),('Pest Watch','Feb 20 – Mar 5'),('Harvesting','Mar 15 – Apr 5')],'#a78bfa','rgba(167,139,250,0.15)')
+    ] %}
+    {% for title, period, tag, desc, phases, color, bg in seasons %}
+    <div style="background:{{ bg }}; border:1px solid {{ color }}44; border-radius:20px; padding:1.75rem; position:relative; overflow:hidden;">
+        <div style="font-size:1.2rem; font-weight:900; color:#fff; margin-bottom:4px;">{{ title }}</div>
+        <div style="font-size:0.8rem; color:{{ color }}; font-weight:700; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">{{ period }}</div>
+        <span style="background:{{ color }}33; color:{{ color }}; border:1px solid {{ color }}55; padding:3px 10px; border-radius:20px; font-size:0.72rem; font-weight:700;">{{ tag }}</span>
+        <p style="color:rgba(255,255,255,0.75); font-size:0.85rem; line-height:1.5; margin:12px 0;">{{ desc }}</p>
+        <div style="border-top:1px solid {{ color }}33; padding-top:12px;">
+            {% for phase, dates in phases %}
+            <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.05); font-size:0.82rem;">
+                <span style="color:rgba(255,255,255,0.7);">{{ phase }}</span>
+                <span style="color:{{ color }}; font-weight:700;">{{ dates }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- ═══ MONTHLY ACTIVITY GRID ═══ -->
+<div class="card" style="margin-bottom:2rem;">
+    <div class="card-body">
+        <h2 style="font-size:1.2rem; font-weight:800; margin-bottom:1.5rem;">📆 Monthly Farming Activity Planner</h2>
+        <div style="display:grid; grid-template-columns:repeat(6,1fr); gap:0.75rem;">
+            {% set months = [
+                ('Jan','🌾','Navarai Harvest + Samba transplanting','#f59e0b'),
+                ('Feb','🥬','Vegetable harvest, soil amendment','#84cc16'),
+                ('Mar','🌿','Navarai harvest, land preparation','#a78bfa'),
+                ('Apr','☀️','Summer ploughing, compost application','#f97316'),
+                ('May','💧','Irrigation check, pre-monsoon prep','#38bdf8'),
+                ('Jun','🌱','Kuruvai sowing, nursery preparation','#16a34a'),
+                ('Jul','🌧️','Kuruvai transplanting, fertilization','#60a5fa'),
+                ('Aug','🐛','Pest monitoring, Kuruvai mid-season','#fbbf24'),
+                ('Sep','🌾','Kuruvai harvest begins','#4ade80'),
+                ('Oct','🌱','Samba sowing, land preparation','#f59e0b'),
+                ('Nov','💧','Samba irrigation, weed control','#38bdf8'),
+                ('Dec','🌾','Samba mid-season, nutrient application','#84cc16')
+            ] %}
+            {% for month, icon, activity, color in months %}
+            <div style="background:rgba(255,255,255,0.04); border:1px solid {{ color }}33; border-radius:12px; padding:14px; text-align:center; transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'; this.style.transform='translateY(-3px)'" onmouseout="this.style.background='rgba(255,255,255,0.04)'; this.style.transform=''">
+                <div style="font-weight:800; color:{{ color }}; font-size:0.9rem; margin-bottom:4px;">{{ month }}</div>
+                <div style="font-size:1.8rem; margin-bottom:8px;">{{ icon }}</div>
+                <div style="font-size:0.72rem; color:rgba(255,255,255,0.7); line-height:1.4;">{{ activity }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- ═══ CROP-SPECIFIC CALENDAR ═══ -->
+<div class="card" style="margin-bottom:2rem;">
+    <div class="card-body" style="padding-bottom:0;">
+        <h2 style="font-size:1.2rem; font-weight:800; margin-bottom:1.25rem;">🌾 Crop-Specific Season Schedule</h2>
+    </div>
+    <table class="data-table">
+        <thead><tr><th>Crop</th><th>Best Season</th><th>Sowing Period</th><th>Duration</th><th>Harvest Month</th><th>Water Need</th></tr></thead>
+        <tbody>
+            {% for row in [
+                ('🌾 Samba Paddy','Samba','Oct 15 – Nov 15','125–135 days','Feb – Mar','High — 1200mm'),
+                ('🌾 Kuruvai Paddy','Kuruvai','Jun 15 – Jul 15','105–115 days','Oct – Nov','High — 1000mm'),
+                ('🌻 Groundnut','Samba / Navarai','Oct – Jan','100–110 days','Feb – Mar','Moderate — 450mm'),
+                ('🍬 Sugarcane','Year Round','Jan – Mar','10–12 months','Dec – Feb','High — 1700mm'),
+                ('🫘 Green Gram','Navarai','Jan – Feb','60–70 days','Mar – Apr','Low — 250mm'),
+                ('🌽 Maize','Kuruvai','Jun – Jul','95–105 days','Sep – Oct','Moderate — 500mm'),
+                ('🌶️ Chilli','Samba','Oct – Nov','150–180 days','Mar – May','Moderate — 600mm'),
+                ('🥥 Coconut','Year Round','Jun – Jul','6–8 years (perennial)','Year Round','Moderate — 1200mm')
+            ] %}
+            <tr>
+                <td style="font-weight:700; color:#fff;">{{ row[0] }}</td>
+                <td><span class="badge-amber">{{ row[1] }}</span></td>
+                <td style="color:var(--lime);">{{ row[2] }}</td>
+                <td style="color:var(--muted);">{{ row[3] }}</td>
+                <td style="color:#fbbf24; font-weight:700;">{{ row[4] }}</td>
+                <td style="color:#60a5fa;">{{ row[5] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

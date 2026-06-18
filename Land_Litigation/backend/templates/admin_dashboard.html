@@ -1,0 +1,258 @@
+{% extends 'admin_base.html' %}
+{% block title %}Super Dashboard{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 2rem;">
+    <div>
+        <h2>Dashboard Overview</h2>
+        <p style="color: var(--text-muted);">Welcome to the LandLitix Admin Portal</p>
+    </div>
+    <button onclick="downloadAdminReport()" class="btn btn-primary" style="width: auto; background-color: var(--success); font-weight: bold; padding: 0.8rem 1.5rem; display: flex; align-items: center; gap: 0.5rem; border: none; cursor: pointer;">
+        📥 Download Master Report
+    </button>
+</div>
+
+<div id="admin-main-ui">
+
+<!-- Metrics -->
+<div class="metrics-grid">
+    <div class="metric-card glass" style="border-left: 4px solid var(--primary);">
+        <span class="metric-title">Total Lands</span>
+        <span class="metric-value">{{ total_lands }}</span>
+    </div>
+    <div class="metric-card glass" style="border-left: 4px solid var(--secondary);">
+        <span class="metric-title">Total Cases</span>
+        <span class="metric-value">{{ total_cases }}</span>
+    </div>
+    <div class="metric-card glass" style="border-left: 4px solid var(--warning);">
+        <span class="metric-title">Ongoing Cases</span>
+        <span class="metric-value">{{ active_cases }}</span>
+    </div>
+    <div class="metric-card glass" style="border-left: 4px solid var(--success);">
+        <span class="metric-title">Verified Lands</span>
+        <span class="metric-value">{{ verified_lands }}</span>
+    </div>
+</div>
+
+
+
+<!-- Analytics & Heatmap -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; margin-bottom: 2rem;">
+    <!-- Analytics Chart -->
+    <div class="glass" style="padding: 2rem; display: flex; flex-direction: column;">
+        <h3 style="color: var(--text-main); margin-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem;">Status Breakdown</h3>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">Case lifecycle distribution.</p>
+        <div style="flex-grow: 1; position: relative; display: flex; justify-content: center; align-items: center; min-height: 250px;">
+            <canvas id="statusChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Heatmap -->
+    <div class="glass" style="padding: 2rem;">
+        <h3 style="color: var(--text-main); margin-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem;">State-wide Area Dispute Heatmap</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">This predictive heatmap overlays ongoing litigation clusters to help identify high-risk geographical zones across Tamil Nadu.</p>
+        <div id="heatmap" style="height: 350px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);"></div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Init Map
+        var map = L.map('heatmap').setView([11.1271, 78.6569], 7);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap', subdomains: 'abcd', maxZoom: 20
+        }).addTo(map);
+
+        var heatData = {{ heatmap_data | tojson | safe }};
+        if(heatData && heatData.length > 0) {
+            L.heatLayer(heatData, { radius: 30, blur: 20, maxZoom: 10,
+                gradient: {0.4: 'cyan', 0.6: 'lime', 0.8: 'yellow', 1.0: 'red'}
+            }).addTo(map);
+        }
+
+        // Init Chart
+        const ctx = document.getElementById('statusChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Ongoing', 'Closed', 'Pending'],
+                datasets: [{
+                    data: [{{ active_cases }}, {{ closed_cases }}, {{ pending_cases }}],
+                    backgroundColor: ['#ef4444', '#10b981', '#f59e0b'],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { color: '#e2e8f0', padding: 15 } }
+                },
+                cutout: '70%'
+            }
+        });
+    });
+</script>
+
+<!-- Recent Cases Table -->
+<div class="glass table-container">
+    <div style="padding: 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <h3 style="margin: 0;">Case Registry</h3>
+            <input type="text" id="caseSearch" placeholder="Search by Land or Detail..." style="padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: white; outline: none; width: 250px;">
+        </div>
+        <a href="{{ url_for('add_case_page') }}" class="btn btn-primary" style="width: auto; padding: 0.5rem 1rem; font-size: 0.9rem;">+ New Case</a>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Case ID</th>
+                <th>Land ID</th>
+                <th>Case Details</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="casesTableBody">
+            {% for case in cases %}
+            <tr>
+                <td>#{{ case.id }}</td>
+                <td style="font-weight: 600;">{{ case.land_id }}</td>
+                <td style="color: var(--text-muted);">{{ case.case_details[:50] }}...</td>
+                <td>
+                    {% if case.status|lower == 'ongoing' %}
+                        <span class="badge badge-active">Ongoing</span>
+                    {% elif case.status|lower == 'closed' %}
+                        <span class="badge badge-closed">Closed</span>
+                    {% else %}
+                        <span class="badge badge-pending">{{ case.status }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <!-- Inline Update Form -->
+                    <form action="{{ url_for('update_case') }}" method="POST" style="display: flex; gap: 0.5rem; margin: 0;">
+                        <input type="hidden" name="case_id" value="{{ case.id }}">
+                        <select name="case_status" style="padding: 0.3rem 0.5rem; border-radius: 6px; background: rgba(0,0,0,0.4); color: white; border: 1px solid rgba(255,255,255,0.2); outline: none; font-size: 0.85rem; cursor: pointer; transition: 0.2s;" onchange="this.form.submit()">
+                            <option value="Ongoing" {% if case.status|lower == 'ongoing' %}selected{% endif %}>Ongoing</option>
+                            <option value="Closed" {% if case.status|lower == 'closed' %}selected{% endif %}>Closed</option>
+                            <option value="Pending" {% if case.status|lower == 'pending' %}selected{% endif %}>Pending</option>
+                        </select>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+            
+            {% if not cases %}
+            <tr>
+                <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 2rem;">No cases found in the database.</td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+</div> <!-- Close admin-main-ui -->
+
+<!-- HIDDEN REPORT MASTER TEMPLATE -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<div id="admin-report-ui" style="display: none; background: white; color: black; font-family: 'Times New Roman', Times, serif; padding: 40px; box-sizing: border-box; width: 100%; max-width: 800px; margin: 0 auto;">
+    
+    <!-- State Header -->
+    <div style="text-align: center; border-bottom: 2px solid black; padding-bottom: 15px; margin-bottom: 20px;">
+        <h1 style="margin: 0; font-size: 24px; text-transform: uppercase;">Department of Land Records</h1>
+        <h2 style="margin: 5px 0; font-size: 18px;">Official Litigation Master Report</h2>
+        <p style="margin: 5px 0; font-size: 14px;">Tamil Nadu State Registry</p>
+        <p style="margin: 5px 0; font-size: 12px; color: #555;">Generated on: <span id="admin-wp-date"></span></p>
+    </div>
+
+    <!-- Executive Summary -->
+    <div style="margin-bottom: 30px;">
+        <h3 style="font-size: 16px; border-bottom: 1px solid #ccc; padding-bottom: 5px;">1. Executive Summary</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px;">
+            <tr>
+                <td style="padding: 8px; border: 1px solid black; background: #f0f0f0; width: 50%;">Total Registered Lands</td>
+                <td style="padding: 8px; border: 1px solid black;">{{ total_lands }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border: 1px solid black; background: #f0f0f0;">Total Civil Cases Recorded</td>
+                <td style="padding: 8px; border: 1px solid black;">{{ total_cases }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border: 1px solid black; background: #f0f0f0;">Active / Ongoing Disputes</td>
+                <td style="padding: 8px; border: 1px solid black;">{{ active_cases }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Case Manifest -->
+    <div style="margin-bottom: 30px;">
+        <h3 style="font-size: 16px; border-bottom: 1px solid #ccc; padding-bottom: 5px;">2. Case Manifest (Recent 25)</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px;">
+            <thead>
+                <tr style="background: #e0e0e0;">
+                    <th style="padding: 6px; border: 1px solid black; text-align: left;">Case ID</th>
+                    <th style="padding: 6px; border: 1px solid black; text-align: left;">Land Asset ID</th>
+                    <th style="padding: 6px; border: 1px solid black; text-align: left;">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for case in cases[:25] %}
+                <tr>
+                    <td style="padding: 6px; border: 1px solid black;">#{{ case.id }}</td>
+                    <td style="padding: 6px; border: 1px solid black;">{{ case.land_id }}</td>
+                    <td style="padding: 6px; border: 1px solid black;">{{ case.status }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function downloadAdminReport() {
+        document.getElementById('admin-wp-date').innerText = new Date().toLocaleString();
+        
+        var mainUI = document.getElementById('admin-main-ui');
+        var reportUI = document.getElementById('admin-report-ui');
+        
+        // UI Swap Trick for html2canvas
+        mainUI.style.display = 'none';
+        reportUI.style.display = 'block';
+        window.scrollTo(0,0);
+
+        var opt = {
+          margin:       0.5,
+          filename:     'State_Litigation_Report.pdf',
+          image:        { type: 'jpeg', quality: 0.98 },
+          html2canvas:  { scale: 2, useCORS: true },
+          jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
+        
+        html2pdf().set(opt).from(reportUI).save().then(function() {
+            mainUI.style.display = 'block';
+            reportUI.style.display = 'none';
+        });
+    }
+    // Real-time Search Filter for the Table
+    const searchInput = document.getElementById('caseSearch');
+    searchInput.addEventListener('keyup', function() {
+        let filter = this.value.toLowerCase();
+        let rows = document.querySelectorAll('#casesTableBody tr');
+        
+        rows.forEach(row => {
+            // Include row if its text content matches
+            if(row.innerText.toLowerCase().includes(filter)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

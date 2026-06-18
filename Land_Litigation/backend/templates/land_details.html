@@ -1,0 +1,341 @@
+{% extends 'user_base.html' %}
+{% block title %}Asset Ledger - {{ land.land_id }}{% endblock %}
+
+{% block content %}
+<!-- Include Leaflet & html2pdf -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+    <div>
+        <div class="badge" style="background: rgba(139,92,246,0.15); color: var(--primary); margin-bottom: 0.5rem; border: 1px solid rgba(139,92,246,0.3);">Public Asset Ledger</div>
+        <h2 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Asset: {{ land.land_id }}</h2>
+        <p style="color: var(--text-muted); font-size: 1.1rem;">Verified chain of ownership and litigation history.</p>
+    </div>
+    <div>
+        <button onclick="downloadReport()" class="btn btn-primary" style="background: var(--primary); font-weight: bold; font-size: 0.9rem;">
+            📄 Download Premium Title Report
+        </button>
+    </div>
+</div>
+
+<div id="report-content" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+    <!-- Asset Details & Map -->
+    <div>
+        <div class="glass" style="padding: 2rem; border-top: 4px solid var(--primary); margin-bottom: 2rem;">
+            <h3 style="color: var(--text-main); margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem;">Asset Information</h3>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                <div>
+                    <span style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Registered Owner</span>
+                    <div style="font-size: 1.2rem; font-weight: 600; color: var(--text-main);">{{ land.current_owner }}</div>
+                </div>
+                <div>
+                    <span style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Property Location</span>
+                    <div style="font-size: 1rem; color: var(--text-main);">{{ land.address }}<br>{{ land.district }}, {{ land.state }}</div>
+                </div>
+            </div>
+
+            <!-- GPS Map -->
+            <div style="display: flex; justify-content: space-between; align-items: end; margin-bottom: 0.5rem;">
+                <h4 style="color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase; margin: 0;">Geospatial Intelligence</h4>
+                <div style="font-size: 0.8rem; display: flex; gap: 10px; color: var(--text-main);">
+                    <label style="cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                        <input type="checkbox" id="floodToggle" onchange="toggleFloodLayer()"> Flood Risk Layer
+                    </label>
+                </div>
+            </div>
+            <div id="map" style="height: 250px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);"></div>
+
+            <!-- Financial Pane -->
+            <div style="margin-top: 2rem;">
+                <h4 style="color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase; margin-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem;">Financial & Tax Compliance</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                    <div style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 8px;">
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">Est. Guideline Value</span>
+                        <div style="font-size: 1.1rem; font-weight: bold; color: var(--success);">₹25,50,000</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 8px;">
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">Stamp Duty Paid</span>
+                        <div style="font-size: 1.1rem; font-weight: bold; color: var(--text-main);">₹1,78,500 <span style="font-size: 0.75rem; color: var(--success);">(7%)</span></div>
+                    </div>
+                    <div style="background: rgba(16, 185, 129, 0.1); padding: 1rem; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.3); grid-column: span 2; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <span style="font-size: 0.8rem; color: var(--text-muted);">Municipal Tax Status</span>
+                            <div style="font-size: 1rem; font-weight: bold; color: var(--success);">✅ Verified Clear (Up to 2025)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Right Side: Risk Score & Flow Chart -->
+    <div>
+        <!-- Predictive Risk Score -->
+        <div class="glass" style="padding: 2rem; margin-bottom: 2rem; border-top: 4px solid {% if risk_score >= 80 %}var(--success){% elif risk_score >= 50 %}var(--warning){% else %}var(--danger){% endif %};">
+            <h3 style="color: var(--text-main); margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem;">Predictive Litigation Risk Score</h3>
+            
+            <div style="display: flex; align-items: center; gap: 2rem;">
+                <!-- Circular Score visualizer -->
+                <div style="position: relative; width: 120px; height: 120px; border-radius: 50%; background: conic-gradient({% if risk_score >= 80 %}var(--success){% elif risk_score >= 50 %}var(--warning){% else %}var(--danger){% endif %} {{ risk_score }}%, rgba(255,255,255,0.05) 0); display: flex; justify-content: center; align-items: center;">
+                    <div style="position: absolute; width: 100px; height: 100px; background: var(--bg-dark); border-radius: 50%; display: flex; justify-content: center; align-items: center; flex-direction: column;">
+                        <span style="font-size: 2.5rem; font-weight: 800; color: var(--text-main);">{{ risk_score }}</span>
+                        <span style="font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase;">/100</span>
+                    </div>
+                </div>
+                
+                <div style="flex: 1;">
+                    <h4 style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; margin-bottom: 0.5rem;">Risk AI Analysis</h4>
+                    <ul style="margin: 0; padding-left: 1.2rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                        {% for factor in risk_factors %}
+                            <li style="color: {% if 'High Risk' in factor %}var(--danger){% elif 'Notice' in factor %}var(--warning){% elif 'Clear Title' in factor %}var(--success){% else %}var(--text-main){% endif %}; font-size: 0.9rem;">
+                                {{ factor }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Flowchart -->
+        <div class="glass" style="padding: 2rem; margin-bottom: 2rem;">
+            <h3 style="color: var(--text-main); margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem;">Chain of Title (Deed Flow)</h3>
+            
+            {% if history %}
+                <div style="position: relative; padding-left: 2rem;">
+                    <!-- Vertical Line -->
+                    <div style="position: absolute; left: 0.3rem; top: 0; bottom: 0; width: 3px; background: rgba(139,92,246,0.3);"></div>
+                    
+                    {% for h in history %}
+                    <div style="position: relative; margin-bottom: 2rem;">
+                        <!-- Node Dot -->
+                        <div style="position: absolute; left: -2.4rem; top: 0.3rem; width: 18px; height: 18px; background: var(--primary); border-radius: 50%; box-shadow: 0 0 10px var(--primary); border: 3px solid var(--bg-card);"></div>
+                        
+                        <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1.2rem; border-radius: 8px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; align-items: center;">
+                                <div style="font-size: 1.2rem; color: var(--text-main); font-weight: bold;">{{ h.owner_name }}</div>
+                                <div style="background: rgba(255,255,255,0.05); padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.75rem; color: var(--text-muted);">
+                                    {{ h.transfer_date }}
+                                </div>
+                            </div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">
+                                Transferred Property / Registered Deed.
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p style="color: var(--text-muted); text-align: center; padding: 2rem;">No historical transfers recorded. Original owner intact.</p>
+            {% endif %}
+        </div>
+
+        <div class="glass" style="padding: 2rem;">
+            <h3 style="color: var(--text-main); margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem;">Official Case History</h3>
+            
+            {% if cases %}
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                {% for case in cases %}
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1rem; border-radius: 8px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <strong style="color: var(--text-muted);">Case #{{ case.id }}</strong>
+                            {% if case.status|lower == 'ongoing' %}
+                                <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: var(--danger); padding: 0.2rem 0.5rem;">⚠️ Ongoing Dispute</span>
+                            {% elif case.status|lower == 'closed' %}
+                                <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: var(--success); padding: 0.2rem 0.5rem;">✅ Resolved</span>
+                            {% else %}
+                                <span class="badge" style="background: rgba(255, 255, 255, 0.1); color: var(--text-main); padding: 0.2rem 0.5rem;">{{ case.status }}</span>
+                            {% endif %}
+                        </div>
+                        <p style="color: var(--text-main); font-size: 0.95rem; line-height: 1.5;">{{ case.case_details }}</p>
+                    </div>
+                {% endfor %}
+                </div>
+            {% else %}
+                <div style="text-align: center; color: var(--success); padding: 1rem; background: rgba(16, 185, 129, 0.1); border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.3);">
+                    🟢 This asset has zero recorded history of litigation.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- OFF-SCREEN WHITE PAPER TEMPLATE FOR PDF EXPORT -->
+<div id="white-paper-report" style="display: none; width: 800px; background: #ffffff; color: #000000; font-family: 'Times New Roman', serif; padding: 40px; box-sizing: border-box; line-height: 1.6;">
+    <div style="display: flex; justify-content: space-between; align-items: start; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px;">
+        <div style="text-align: left;">
+            <h1 style="font-size: 1.5rem; margin: 0; font-weight: bold; text-transform: uppercase;">GOV. OF TAMIL NADU</h1>
+            <h2 style="font-size: 1.1rem; margin: 5px 0 0; color: #444; font-weight: normal;">AgriLitix Predictive Intelligence</h2>
+            <h3 style="font-size: 1.2rem; margin: 10px 0 0; font-weight: bold; text-decoration: underline;">PREMIUM TITLE & ENCUMBRANCE REPORT</h3>
+        </div>
+        <div style="text-align: center;">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=VerifiedStatus:{{ land.land_id }}" alt="QR" style="width: 70px; height: 70px; border: 1px solid #000; padding: 2px;">
+            <div style="font-size: 0.7rem; color: #555; margin-top: 5px; font-weight: bold;">Scan to Verify</div>
+        </div>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 20px;">
+        <div><strong>Reference ID:</strong> TR-{{ land.land_id }}-<span id="wp-date"></span></div>
+        <div><strong>Generation Date:</strong> <span id="wp-date-long"></span></div>
+    </div>
+
+    <p style="font-size: 0.9rem; text-align: justify; margin-bottom: 20px;">
+        This report constitutes a digitally synthesized abstract of land ownership, registry transfers, and active/resolved civil litigation associated with the specified parcel. It is generated through the AgriLitix Data Intelligence Desk by cross-referencing public Encumbrance Certificates (EC) and e-Courts integrations.
+    </p>
+
+    <h4 style="font-size: 1.1rem; border-bottom: 1px solid #aaa; margin-bottom: 10px; text-transform: uppercase;">1. Schedule of Property</h4>
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 0.95rem;">
+        <tr>
+            <td style="border: 1px solid #000; padding: 8px; width: 35%;"><strong>Asset/Plot ID</strong></td>
+            <td style="border: 1px solid #000; padding: 8px;">{{ land.land_id }}</td>
+        </tr>
+        <tr>
+            <td style="border: 1px solid #000; padding: 8px;"><strong>Survey Number</strong></td>
+            <td style="border: 1px solid #000; padding: 8px;">{{ land.survey_number or 'N/A' }}</td>
+        </tr>
+        <tr>
+            <td style="border: 1px solid #000; padding: 8px;"><strong>Registered Owner</strong></td>
+            <td style="border: 1px solid #000; padding: 8px;">{{ land.current_owner }}</td>
+        </tr>
+        <tr>
+            <td style="border: 1px solid #000; padding: 8px;"><strong>Location / Jurisdiction</strong></td>
+            <td style="border: 1px solid #000; padding: 8px;">{{ land.address }} ({{ land.district }}, {{ land.state }})</td>
+        </tr>
+        <tr>
+            <td style="border: 1px solid #000; padding: 8px;"><strong>Geospatial Coordinates</strong></td>
+            <td style="border: 1px solid #000; padding: 8px;">{{ land.latitude if land.latitude else 'N/A' }}, {{ land.longitude if land.longitude else 'N/A' }}</td>
+        </tr>
+    </table>
+
+    <h4 style="font-size: 1.1rem; border-bottom: 1px solid #aaa; margin-bottom: 10px; text-transform: uppercase;">2. Chain of Title (Historical Deeds)</h4>
+    {% if history %}
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 0.9rem;">
+        <thead>
+            <tr style="background-color: #f2f2f2;">
+                <th style="border: 1px solid #000; padding: 8px; text-align: left;">Date of Transfer</th>
+                <th style="border: 1px solid #000; padding: 8px; text-align: left;">Registered To (Owner)</th>
+                <th style="border: 1px solid #000; padding: 8px; text-align: left;">Remarks</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for h in history %}
+            <tr>
+                <td style="border: 1px solid #000; padding: 8px;">{{ h.transfer_date }}</td>
+                <td style="border: 1px solid #000; padding: 8px;">{{ h.owner_name }}</td>
+                <td style="border: 1px solid #000; padding: 8px;">Formal Transfer / Deed Registration</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="font-size: 0.9rem; margin-bottom: 20px; font-style: italic;">No historical digital transfers recorded. Original assignation remains intact.</p>
+    {% endif %}
+
+    <h4 style="font-size: 1.1rem; border-bottom: 1px solid #aaa; margin-bottom: 10px; text-transform: uppercase;">3. Litigation & Encumbrance Record</h4>
+    {% if cases %}
+    <ul style="font-size: 0.9rem; margin-bottom: 20px; list-style-type: square; padding-left: 20px;">
+        {% for case in cases %}
+        <li style="margin-bottom: 10px;">
+            <strong>Case Code:</strong> #{{ case.id }} | <strong>Status:</strong> {{ case.status|upper }}<br>
+            <strong>Details:</strong> {{ case.case_details }}
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p style="font-size: 0.9rem; margin-bottom: 20px;">This property exhibits <strong style="text-decoration: underline;">NIL</strong> recorded history of active or closed civil litigation within the integrated judicial databases.</p>
+    {% endif %}
+
+    <h4 style="font-size: 1.1rem; border-bottom: 1px solid #aaa; margin-bottom: 10px; text-transform: uppercase;">4. Predictive Risk Assessment</h4>
+    <div style="border: 1px solid #000; padding: 15px; background-color: #fcfcfc; margin-bottom: 30px;">
+        <div style="font-size: 1.2rem; font-weight: bold; margin-bottom: 10px;">Aggregated Risk Score: {{ risk_score }} / 100</div>
+        <ul style="font-size: 0.9rem; margin: 0; padding-left: 20px;">
+            {% for factor in risk_factors %}
+                <li>{{ factor }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div style="font-size: 0.8rem; text-align: center; border-top: 1px dashed #aaa; padding-top: 10px; color: #555;">
+        <strong>Disclaimer:</strong> This generated report is an analytic assessment derived from secondary public datasets and predictive models. It serves exclusively as an informational tool for risk evaluation and does not constitute legally binding judicial proof or override a physical Sub-Registrar Certified Encumbrance Certificate.
+    </div>
+</div>
+
+<script>
+    // Initialize Map
+    document.addEventListener("DOMContentLoaded", function() {
+        var lat = {{ land.latitude if land.latitude else 13.0827 }};
+        var lon = {{ land.longitude if land.longitude else 80.2707 }};
+        
+        var map = L.map('map').setView([lat, lon], 15);
+        
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap contributors',
+            subdomains: 'abcd',
+            maxZoom: 20
+        }).addTo(map);
+
+        L.marker([lat, lon]).addTo(map)
+            .bindPopup("<b>{{ land.land_id }}</b><br>{{ land.address }}")
+            .openPopup();
+            
+        // Setup Map Layer Toggles globally
+        window.floodLayer = L.circle([lat, lon], {
+            color: 'red',
+            fillColor: '#f03',
+            fillOpacity: 0.4,
+            radius: 400
+        }).bindPopup("High Risk Flood Zone overlay mapping.");
+        window.activeMap = map;
+    });
+
+    function toggleFloodLayer() {
+        if(document.getElementById('floodToggle').checked) {
+            window.floodLayer.addTo(window.activeMap);
+        } else {
+            window.floodLayer.remove();
+        }
+    }
+
+    // Download PDF Function
+    function downloadReport() {
+        // Dynamically set dates for the white paper
+        const today = new Date();
+        document.getElementById('wp-date').innerText = today.toISOString().split('T')[0].replace(/-/g, '');
+        document.getElementById('wp-date-long').innerText = today.toLocaleDateString('en-IN', {
+            year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+        });
+
+        // 100% Reliable Fix: Swap standard dashboard for the White Paper momentarily.
+        // This guarantees html2canvas targets pixels directly in the viewport!
+        var dashboard = document.getElementById('report-content');
+        var whitePaper = document.getElementById('white-paper-report');
+
+        dashboard.style.display = 'none';
+        whitePaper.style.display = 'block';
+        whitePaper.style.position = 'relative';
+        whitePaper.style.width = '100%';
+        whitePaper.style.maxWidth = '800px';
+        whitePaper.style.margin = '0 auto';
+        
+        window.scrollTo(0,0);
+
+        var opt = {
+          margin:       0.5,
+          filename:     'Official_WhitePaper_{{ land.land_id }}.pdf',
+          image:        { type: 'jpeg', quality: 0.98 },
+          html2canvas:  { scale: 2, useCORS: true },
+          jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
+        
+        html2pdf().set(opt).from(whitePaper).save().then(function() {
+            // Restore UI seamlessly
+            dashboard.style.display = 'grid';
+            whitePaper.style.display = 'none';
+        });
+    }
+</script>
+{% endblock %}

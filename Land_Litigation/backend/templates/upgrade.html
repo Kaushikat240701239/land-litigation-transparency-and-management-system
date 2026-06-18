@@ -1,0 +1,58 @@
+{% extends 'user_base.html' %}
+{% block title %}Upgrade to AgriLitix Premium{% endblock %}
+
+{% block content %}
+<div style="padding: 2rem; max-width: 1000px; margin: 0 auto;">
+    <div class="glass" style="text-align: center; padding: 4rem 2rem; border-radius: 30px; background: linear-gradient(135deg, rgba(5, 46, 22, 0.9), rgba(22, 163, 74, 0.2)); border: 1px solid rgba(22, 163, 74, 0.3); position: relative; overflow: hidden;">
+        <!-- Background Glow -->
+        <div style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(132, 204, 22, 0.1) 0%, transparent 70%); pointer-events: none;"></div>
+
+        <div class="badge" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.4); margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 2px; font-weight: 800;">AgriLitix Elite</div>
+        <h1 style="font-size: 3.5rem; font-weight: 900; margin-bottom: 1rem; background: linear-gradient(90deg, #84cc16, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Unlock Your Land's Full Potential</h1>
+        <p style="font-size: 1.25rem; color: var(--text-muted); max-width: 700px; margin: 0 auto 3rem;">Experience the future of agriculture with satellite insights, real-time market data, and automated soil intelligence tailored for Tamil Nadu farmers.</p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 4rem;">
+            <div class="glass" style="padding: 2rem; border-radius: 20px; transition: transform 0.3s; cursor: default;">
+                <div style="font-size: 2.5rem; margin-bottom: 1rem;">🛰️</div>
+                <h3 style="margin-bottom: 0.5rem; color: #fff;">Live Satellite Scans</h3>
+                <p style="font-size: 0.9rem; color: var(--text-muted);">Multispectral imaging to monitor crop health and moisture levels.</p>
+            </div>
+            <div class="glass" style="padding: 2rem; border-radius: 20px; transition: transform 0.3s;">
+                <div style="font-size: 2.5rem; margin-bottom: 1rem;">🧬</div>
+                <h3 style="margin-bottom: 0.5rem; color: #fff;">Soil Analytics</h3>
+                <p style="font-size: 0.9rem; color: var(--text-muted);">Digital reports and fertilizer recommendations based on TNAU standards.</p>
+            </div>
+            <div class="glass" style="padding: 2rem; border-radius: 20px; transition: transform 0.3s;">
+                <div style="font-size: 2.5rem; margin-bottom: 1rem;">📈</div>
+                <h3 style="margin-bottom: 0.5rem; color: #fff;">Market Intelligence</h3>
+                <p style="font-size: 0.9rem; color: var(--text-muted);">Live pricing from local mandis to ensure you get the best value.</p>
+            </div>
+            <div class="glass" style="padding: 2rem; border-radius: 20px; transition: transform 0.3s;">
+                <div style="font-size: 2.5rem; margin-bottom: 1rem;">🏛️</div>
+                <h3 style="margin-bottom: 0.5rem; color: #fff;">Smart Schemes</h3>
+                <p style="font-size: 0.9rem; color: var(--text-muted);">Personalized eligibility tracking for Central and State government schemes.</p>
+            </div>
+        </div>
+
+        <div class="glass" style="display: inline-block; padding: 2rem 4rem; border-radius: 24px; border: 2px solid rgba(22, 163, 74, 0.5); background: rgba(0,0,0,0.3);">
+            <div style="font-size: 1rem; color: var(--text-muted); margin-bottom: 0.5rem;">Total Annual Subscription</div>
+            <div style="font-size: 4rem; font-weight: 900; color: #fff; margin-bottom: 2rem;">₹2,500 <span style="font-size: 1.2rem; color: var(--text-muted); font-weight: 400;">/ year</span></div>
+            
+            <form action="{{ url_for('process_upgrade') }}" method="POST">
+                <button type="submit" class="btn" style="background: linear-gradient(90deg, #16a34a, #84cc16); color: #fff; padding: 1.25rem 3rem; font-size: 1.2rem; font-weight: 800; border-radius: 50px; cursor: pointer; border: none; box-shadow: 0 10px 30px rgba(22, 163, 74, 0.4); text-transform: uppercase; letter-spacing: 1px; width: 100%;">
+                    Confirm & Upgrade Now
+                </button>
+            </form>
+            <p style="margin-top: 1.5rem; font-size: 0.85rem; color: var(--text-muted);">Secure SSL Encrypted Transaction • Instant Activation</p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .glass:hover {
+        transform: translateY(-5px);
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(22, 163, 74, 0.4);
+    }
+</style>
+{% endblock %}

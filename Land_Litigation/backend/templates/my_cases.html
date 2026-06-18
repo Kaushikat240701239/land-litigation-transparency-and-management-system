@@ -1,0 +1,55 @@
+{% extends 'user_base.html' %}
+{% block title %}My Cases{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+    <h2 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Legal Cases & Litigation</h2>
+    <p style="color: var(--text-muted); font-size: 1.1rem;">Review any active or closed disputes linked to your digital real estate assets.</p>
+</div>
+
+<div class="glass table-container" style="border-top: 4px solid var(--warning);">
+    <table>
+        <thead>
+            <tr>
+                <th>Case Reference</th>
+                <th>Affected Asset</th>
+                <th>Legal Details / Description</th>
+                <th>Grid Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for case in user_cases %}
+            <tr>
+                <td style="color: var(--text-muted);">#CS-{{ case.id }}</td>
+                <td style="font-weight: 600; color: var(--primary);">{{ case.land_id }}</td>
+                <td>
+                    {{ case.case_details[:70] }}{% if case.case_details|length > 70 %}...{% endif %}
+                </td>
+                <td>
+                    {% if case.status|lower == 'ongoing' %}
+                        <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.3); padding: 0.4rem 0.8rem;">⚠️ Ongoing Dispute</span>
+                    {% elif case.status|lower == 'closed' %}
+                        <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); padding: 0.4rem 0.8rem;">✅ Resolved</span>
+                    {% else %}
+                        <span class="badge" style="background: rgba(255, 255, 255, 0.1); color: var(--text-main); border: 1px solid var(--border-color); padding: 0.4rem 0.8rem;">{{ case.status }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('land_details', land_id=case.land_id) }}" style="color: var(--primary); font-weight: 600; text-decoration: none;">View Ledger</a>
+                </td>
+            </tr>
+            {% endfor %}
+
+            {% if not user_cases %}
+            <tr>
+                <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 4rem;">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="margin-bottom: 1rem; opacity: 0.5;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <p style="font-size: 1.1rem; margin: 0;">You have no active or historical litigation cases.</p>
+                </td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

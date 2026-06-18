@@ -1,0 +1,63 @@
+{% extends 'admin_base.html' %}
+{% block title %}Verify Claims - Admin Gateway{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+    <h2 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Pending Identity Claims</h2>
+    <p style="color: var(--text-muted);">Verify user phone IDs and match them against official records before approving portfolio linking.</p>
+</div>
+
+{% if claims %}
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+    {% for claim in claims %}
+        <div class="glass" style="padding: 1.5rem; border-left: 6px solid var(--amber);">
+            <div style="display: grid; grid-template-columns: 2fr 2fr 1fr; gap: 2rem; align-items: start;">
+                
+                <!-- User Being Verified -->
+                <div>
+                    <div class="badge" style="background: rgba(132, 204, 22, 0.1); color: var(--primary); margin-bottom: 10px;">Claiming User</div>
+                    <div style="font-size: 1.25rem; font-weight: 700;">{{ claim.user_name }}</div>
+                    <div style="color: var(--text-muted); font-size: 0.9rem; margin-top: 4px;">
+                        Phone: <strong style="color: #fff;">{{ claim.user_phone }}</strong>
+                        <br>
+                        Status: {% if claim.is_verified %}<span style="color: var(--primary);">Verified OTP</span>{% else %}<span style="color: var(--danger);">Unverified</span>{% endif %}
+                    </div>
+                </div>
+
+                <!-- Asset Database Info -->
+                <div>
+                    <div class="badge" style="background: rgba(139, 92, 246, 0.1); color: #a78bfa; margin-bottom: 10px;">Property Record (CSV)</div>
+                    <div style="font-size: 1.1rem; font-weight: 600;">{{ claim.land_id }}</div>
+                    <div style="color: var(--text-muted); font-size: 0.9rem; margin-top: 4px;">
+                        Registered Name: <strong>{{ claim.original_owner }}</strong>
+                        <br>
+                        Registered Phone: <strong style="color: #fff;">{{ claim.original_phone }}</strong>
+                    </div>
+
+                     <div style="margin-top: 15px; padding: 12px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; background: rgba(255,255,255,0.03); border: 1px solid var(--border);">
+                        {% if claim.user_phone == claim.original_phone %}
+                            <div style="color: var(--primary);">MATCH: Phone Number Integrity 100%</div>
+                        {% else %}
+                            <div style="color: var(--danger);">MISMATCH: Phone numbers do not align!</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <a href="{{ url_for('view_document', filename=claim.document_path) }}" target="_blank" class="btn" style="padding: 0.75rem; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--border); font-size: 0.85rem; text-align: center; text-decoration: none; border-radius: 8px;">View Proof Document</a>
+                    <a href="{{ url_for('approve_claim', claim_id=claim.id) }}" class="btn btn-primary" style="padding: 0.75rem;">Approve</a>
+                    <a href="{{ url_for('reject_claim', claim_id=claim.id) }}" class="btn btn-danger" style="padding: 0.75rem; background: rgba(239, 68, 68, 0.1); border: 1px solid var(--danger);">Reject</a>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+{% else %}
+    <div class="glass" style="padding: 4rem; text-align: center;">
+        <h3>No Pending Claims</h3>
+        <p style="color: var(--text-muted);">All identity links are currently verified and consistent.</p>
+    </div>
+{% endif %}
+
+{% endblock %}

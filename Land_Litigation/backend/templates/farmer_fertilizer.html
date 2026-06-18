@@ -1,0 +1,437 @@
+{% extends 'farmer_base.html' %}
+{% block title %}Fertilizer Calculator — AgriLitix{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:2rem;">
+    <h1 style="font-size:2.4rem; font-weight:900; background:linear-gradient(90deg,#a78bfa,#ec4899); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">🧮 Fertilizer & Nutrient Calculator</h1>
+    <p style="color:var(--muted); margin-top:6px;">AI-powered NPK dosage recommendations based on crop type, soil health and land area — Powered by TNAU guidelines</p>
+</div>
+
+<!-- ═══ INTERACTIVE CALCULATOR ═══ -->
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:2.5rem; margin-bottom:3rem;">
+
+    <!-- Left: Input Form -->
+    <div class="card" style="border-top: 4px solid var(--lime);">
+        <div class="card-body">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:1.5rem;">
+                <div style="font-size:1.5rem;">⚙️</div>
+                <h2 style="font-size:1.25rem; font-weight:800; color:#fff; margin:0;">Configuration</h2>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:1.5rem;">
+                <div>
+                    <label style="display:flex; align-items:center; gap:8px; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--lime); margin-bottom:8px;">
+                        <span>🌾 Target Crop</span>
+                    </label>
+                    <select id="cropSelect" onchange="calculate()" class="custom-select">
+                        <option value="paddy">Rice Paddy (Samba/Kuruvai)</option>
+                        <option value="groundnut">Groundnut (Oilseed)</option>
+                        <option value="sugarcane">Sugarcane (Commercial)</option>
+                        <option value="maize">Maize (Corn)</option>
+                        <option value="greengram">Green Gram (Pulses)</option>
+                        <option value="chilli">Red Chilli</option>
+                        <option value="banana">Banana / Plantain</option>
+                        <option value="cotton">Cotton (Fiber)</option>
+                        <option value="coconut">Coconut / Palm</option>
+                        <option value="turmeric">Turmeric (Erode Special)</option>
+                        <option value="tomato">Tomato (Hybrid)</option>
+                        <option value="onion">Onion (Small/Bellary)</option>
+                        <option value="mango">Mango (King of Fruits)</option>
+                        <option value="ragi">Ragi (Finger Millet)</option>
+                        <option value="tapioca">Tapioca (Cassava)</option>
+                    </select>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
+                    <div>
+                        <label style="display:flex; align-items:center; gap:8px; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--lime); margin-bottom:8px;">
+                            <span>🌍 Soil Condition</span>
+                        </label>
+                        <select id="soilSelect" onchange="calculate()" class="custom-select">
+                            <option value="alluvial">Alluvial (Best)</option>
+                            <option value="red">Red Laterite</option>
+                            <option value="black">Black Cotton</option>
+                            <option value="sandy">Sandy Loam</option>
+                            <option value="saline">Saline / Alkaline</option>
+                            <option value="hilly">Hilly / Mountain</option>
+                            <option value="clayey">Clayey Loam</option>
+                            <option value="peaty">Peaty / Marshy</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:flex; align-items:center; gap:8px; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--lime); margin-bottom:8px;">
+                            <span>📏 Land Area</span>
+                        </label>
+                        <div style="position:relative;">
+                            <input type="number" id="areaInput" value="2" min="0.1" max="1000" step="0.5" oninput="calculate()"
+                                style="width:100%; background:rgba(255,255,255,0.06); border:1px solid var(--border); color:#fff; padding:14px; border-radius:12px; font-size:1rem; outline:none;">
+                            <span style="position:absolute; right:14px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:0.8rem; font-weight:700;">ACRES</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label style="display:flex; align-items:center; gap:8px; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--lime); margin-bottom:8px;">
+                        <span>💧 System</span>
+                    </label>
+                    <select id="irrigSelect" onchange="calculate()" class="custom-select">
+                        <option value="flood">Traditional Flood</option>
+                        <option value="drip">Precision Drip</option>
+                        <option value="sprinkler">Overhead Sprinkler</option>
+                        <option value="fertigation">Fertigation (AI Root)</option>
+                        <option value="greenhouse">Protected Greenhouse</option>
+                        <option value="mulching">Plastic Mulching</option>
+                        <option value="rainfed">Rainfed / Dry Land</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div style="margin-top:2rem; padding:1.25rem; background:rgba(245, 158, 11, 0.05); border:1px dashed rgba(245, 158, 11, 0.3); border-radius:12px;">
+                <div style="font-size:0.85rem; color:var(--amber); font-weight:700; margin-bottom:4px;">💡 Expert Tip</div>
+                <div id="quickTip" style="font-size:0.8rem; color:rgba(255,255,255,0.7); line-height:1.4;">
+                    Adjusting area also updates the estimated market cost of fertilizers.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right: Results Panel -->
+    <div style="display:flex; flex-direction:column; gap:1.5rem;">
+        
+        <!-- Dashboard Summary -->
+        <div class="card" style="background:linear-gradient(135deg, rgba(6, 78, 59, 0.8), rgba(2, 44, 34, 0.9)); border: 1px solid var(--lime);">
+            <div class="card-body">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                    <h2 style="font-size:1.1rem; font-weight:800; color:var(--lime); text-transform:uppercase; letter-spacing:1px; margin:0;">Nutrient Balance Sheet</h2>
+                    <span id="summaryBadge" style="background:rgba(16, 185, 129, 0.2); color:var(--lime); padding:4px 12px; border-radius:20px; font-size:0.75rem; font-weight:800;">Optimal Formula</span>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem; margin-bottom:2rem;">
+                    <div style="text-align:center;">
+                        <div style="font-size:0.7rem; color:var(--muted); margin-bottom:4px;">NITROGEN</div>
+                        <div id="nVal" style="font-size:1.75rem; font-weight:900; color:#fff;">180 kg</div>
+                        <div class="progress-bar" style="height:4px; margin-top:8px;"><div id="nBar" class="progress-fill" style="background:#4ade80;"></div></div>
+                    </div>
+                    <div style="text-align:center;">
+                        <div style="font-size:0.7rem; color:var(--muted); margin-bottom:4px;">PHOSPHORUS</div>
+                        <div id="pVal" style="font-size:1.75rem; font-weight:900; color:#fff;">80 kg</div>
+                        <div class="progress-bar" style="height:4px; margin-top:8px;"><div id="pBar" class="progress-fill" style="background:#60a5fa;"></div></div>
+                    </div>
+                    <div style="text-align:center;">
+                        <div style="font-size:0.7rem; color:var(--muted); margin-bottom:4px;">POTASSIUM</div>
+                        <div id="kVal" style="font-size:1.75rem; font-weight:900; color:#fff;">80 kg</div>
+                        <div class="progress-bar" style="height:4px; margin-top:8px;"><div id="kBar" class="progress-fill" style="background:#f59e0b;"></div></div>
+                    </div>
+                </div>
+
+                <div style="border-top:1px solid rgba(255,255,255,0.1); padding-top:1.5rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:1rem;">
+                        <span style="font-size:0.9rem; color:var(--white);">Total Estimated Expenditure</span>
+                        <span id="total_cost" style="font-size:2.5rem; font-weight:900; color:var(--lime); text-shadow:0 0 20px rgba(16,185,129,0.3);">₹11,228</span>
+                    </div>
+                    
+                    <div class="sidebar-section" style="padding:0; margin-bottom:10px;">Fertilizer Shopping List</div>
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); padding:12px; border-radius:10px;">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <div style="width:10px; height:10px; border-radius:50%; background:#4ade80;"></div>
+                                <span style="font-weight:600; font-size:0.9rem;">Urea (46% N)</span>
+                            </div>
+                            <div style="text-align:right;">
+                                <div id="nFert" style="font-weight:800; color:#fff;">8 Bags</div>
+                                <div id="urea_cost" style="font-size:0.7rem; color:var(--muted);">₹0</div>
+                            </div>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); padding:12px; border-radius:10px;">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <div style="width:10px; height:10px; border-radius:50%; background:#60a5fa;"></div>
+                                <span style="font-weight:600; font-size:0.9rem;">SSP (16% P)</span>
+                            </div>
+                            <div style="text-align:right;">
+                                <div id="pFert" style="font-weight:800; color:#fff;">10 Bags</div>
+                                <div id="ssp_cost" style="font-size:0.7rem; color:var(--muted);">₹0</div>
+                            </div>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); padding:12px; border-radius:10px;">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <div style="width:10px; height:10px; border-radius:50%; background:#f59e0b;"></div>
+                                <span style="font-weight:600; font-size:0.9rem;">MOP (60% K)</span>
+                            </div>
+                            <div style="text-align:right;">
+                                <div id="kFert" style="font-weight:800; color:#fff;">3 Bags</div>
+                                <div id="mop_cost" style="font-size:0.7rem; color:var(--muted);">₹0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="advice" style="background:rgba(245, 158, 11, 0.1); border:1px solid rgba(245, 158, 11, 0.3); border-radius:16px; padding:1.5rem; font-size:0.9rem; line-height:1.6; color:rgba(255,255,255,0.9);">
+            <!-- Dynamic Advice -->
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .info-card {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 1.5rem;
+    }
+    
+    .custom-select {
+        width: 100%;
+        background: rgba(15, 23, 42, 0.8) !important; /* Solid dark background */
+        border: 1px solid var(--border);
+        color: #fff !important;
+        padding: 14px;
+        border-radius: 12px;
+        font-size: 1rem;
+        outline: none;
+        transition: all 0.2s;
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2384cc16' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 14px center;
+        background-size: 18px;
+    }
+
+    .custom-select:focus {
+        border-color: var(--lime);
+        box-shadow: 0 0 0 2px rgba(132, 204, 22, 0.2);
+    }
+
+    .custom-select option {
+        background: #0f172a; /* Force dark background for options */
+        color: #fff;
+        padding: 10px;
+    }
+</style>
+
+<!-- ═══ APPLICATION TIMELINE ═══ -->
+<div style="margin-bottom:3rem;">
+    <h2 style="font-size:1.5rem; font-weight:800; color:#fff; margin-bottom:1.5rem; display:flex; align-items:center; gap:12px;">
+        <span>📅 Application Timeline</span>
+        <span style="font-size:0.8rem; font-weight:400; color:var(--muted);">(Best Practice Guide)</span>
+    </h2>
+    <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:1.5rem;">
+        <div class="info-card" style="border-top:3px solid #84cc16;">
+            <div style="font-weight:800; color:#84cc16; margin-bottom:8px;">Phase 1: Basal</div>
+            <div style="font-size:0.75rem; color:var(--muted); margin-bottom:8px;">AT PLANTING</div>
+            <p style="font-size:0.85rem; margin:0; line-height:1.5;">Apply 100% of P & K and 25% of N to prepare the soil floor.</p>
+        </div>
+        <div class="info-card" style="border-top:3px solid #38bdf8;">
+            <div style="font-weight:800; color:#38bdf8; margin-bottom:8px;">Phase 2: Tillering</div>
+            <div style="font-size:0.75rem; color:var(--muted); margin-bottom:8px;">20-30 DAYS</div>
+            <p style="font-size:0.85rem; margin:0; line-height:1.5;">Apply 50% of remaining Nitrogen to boost vegetative growth.</p>
+        </div>
+        <div class="info-card" style="border-top:3px solid #f59e0b;">
+            <div style="font-weight:800; color:#f59e0b; margin-bottom:8px;">Phase 3: Panicle</div>
+            <div style="font-size:0.75rem; color:var(--muted); margin-bottom:8px;">FLOWERING</div>
+            <p style="font-size:0.85rem; margin:0; line-height:1.5;">Apply final 25% Nitrogen for grain filling and quality.</p>
+        </div>
+        <div class="info-card" style="border-top:3px solid #ef4444;">
+            <div style="font-weight:800; color:#ef4444; margin-bottom:8px;">Phase 4: Harvest</div>
+            <div style="font-size:0.75rem; color:var(--muted); margin-bottom:8px;">MATURITY</div>
+            <p style="font-size:0.85rem; margin:0; line-height:1.5;">Cease all fertilizer application. Monitor soil moisture levels.</p>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ CALCULATION LOGIC LOG ═══ -->
+<div class="card" style="margin-bottom:3rem; background:rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05);">
+    <div class="card-body">
+        <h2 style="font-size:1.1rem; font-weight:800; color:var(--muted); margin-bottom:1.5rem; text-transform:uppercase; letter-spacing:1px;">🧮 Auditor's Breakdown</h2>
+        <div id="logicLog" style="display:flex; flex-direction:column; gap:12px; font-family:'Courier New', monospace; font-size:0.85rem; color:rgba(255,255,255,0.6);">
+            <!-- Dynamic Logic Logs -->
+        </div>
+    </div>
+</div>
+
+<!-- ═══ OFFICIAL REFERENCE TABLE ═══ -->
+<div class="card" style="margin-bottom:3rem;">
+    <div class="card-body">
+        <h2 style="font-size:1.2rem; font-weight:800; margin-bottom:1.25rem;">📖 Official NPK Reference (per acre)</h2>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Crop Variety</th>
+                    <th>N (kg)</th>
+                    <th>P (kg)</th>
+                    <th>K (kg)</th>
+                    <th style="text-align:right;">Standard Cost</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Paddy (Fine)</td><td>90</td><td>40</td><td>40</td><td style="text-align:right;">₹5,600</td></tr>
+                <tr><td>Sugarcane</td><td>275</td><td>100</td><td>120</td><td style="text-align:right;">₹18,400</td></tr>
+                <tr><td>Coconut</td><td>40</td><td>22</td><td>84</td><td style="text-align:right;">₹4,200</td></tr>
+                <tr><td>Turmeric</td><td>60</td><td>25</td><td>45</td><td style="text-align:right;">₹6,100</td></tr>
+                <tr><td>Groundnut</td><td>12</td><td>40</td><td>20</td><td style="text-align:right;">₹4,200</td></tr>
+                <tr><td>Cotton</td><td>87</td><td>40</td><td>40</td><td style="text-align:right;">₹5,900</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+/*
+ * Fertilizer Calculator — AgriLitix Premium
+ * 
+ * Logic:
+ *  1. Base NPK requirement per acre comes from TNAU data (in kg of nutrient).
+ *  2. Soil factor adjusts for soil fertility (poor soil needs more).
+ *  3. Irrigation factor adjusts efficiency (drip is more efficient, needs less).
+ *  4. Total nutrient needed = base × area × soil_factor × irrig_factor
+ *  5. To find bags:
+ *       Urea    (46% N) : kg_of_fertilizer = N_kg / 0.46,  then bags = kg / 50
+ *       SSP     (16% P) : kg_of_fertilizer = P_kg / 0.16,  then bags = kg / 50
+ *       MOP     (60% K) : kg_of_fertilizer = K_kg / 0.60,  then bags = kg / 50
+ *  6. Cost per 50kg bag (2025 subsidised rates):
+ *       Urea ₹266/bag, SSP ₹400/bag, MOP ₹1700/bag
+ */
+
+const DATA = {
+    paddy:     { n:90,  p:40,  k:40,
+        advice:"Split N into 3: 25% basal + 50% at tillering (20 days) + 25% at panicle initiation. Apply full P & K as basal." },
+    groundnut: { n:12,  p:40,  k:20,
+        advice:"Apply all as basal. Supplement with 500 kg/ha gypsum at pegging stage for calcium and sulphur." },
+    sugarcane: { n:275, p:100, k:120,
+        advice:"Split N into 4 doses: at planting, 45, 90, 135 DAS. Apply full P & K as basal before planting." },
+    maize:     { n:95,  p:40,  k:40,
+        advice:"Apply 50% N + full P & K as basal. Remaining 50% N as top-dress at knee-high stage (35-40 DAS)." },
+    greengram: { n:10,  p:35,  k:25,
+        advice:"Being a legume, apply only starter N. Use Rhizobium seed treatment. All fertilizers as basal." },
+    chilli:    { n:100, p:75,  k:50,
+        advice:"Apply N in 4 splits across the season. Foliar spray 1% KNO3 at flowering improves fruit set significantly." },
+    banana:    { n:200, p:60,  k:300,
+        advice:"Apply in 6 monthly splits. Drip fertigation recommended. Potassium is critical — avoid skipping K doses." },
+    cotton:    { n:87,  p:40,  k:40,
+        advice:"Split N into 3. Foliar spray of 2% urea at squaring, flowering and boll development stages increases yield." },
+    coconut:   { n:40,  p:22,  k:84,
+        advice:"Apply in two equal splits (June-July & Dec-Jan). Maintain 1.8m basin radius. Fertigation at 75% dose is highly effective for nut yield." },
+    turmeric:  { n:60,  p:25,  k:45,
+        advice:"Full P as basal. Split N & K at 30, 60, 90, 120, 150 days. Basal FYM at 10 tons/acre is mandatory for rhizome quality." },
+    tomato:    { n:80,  p:100, k:100,
+        advice:"High P requirement for root establishment. Foliar spray of Microland at 30 & 60 DAS prevents blossom end rot." },
+    onion:     { n:25,  p:25,  k:25,
+        advice:"Basal FYM + split N dressing at 30 days. Potassium is vital for bulb shelf life and pungency." },
+    mango:     { n:40,  p:40,  k:60,
+        advice:"Apply after harvest in July. Boron foliar spray (0.2%) during flowering improves fruit set and reduces internal breakdown." },
+    ragi:      { n:25,  p:12,  k:12,
+        advice:"Split N: 50% basal + 25% at 30 days + 25% at 45 days. Drought-tolerant, but responds well to basal zinc application." },
+    tapioca:   { n:40,  p:50,  k:100,
+        advice:"Split application at planting and 90 days. High K prevents tuber rot and increases starch content." }
+};
+
+// Soil factor: poor/acidic soils need more fertilizer to compensate for lower efficiency
+const SOIL_FACTOR = { alluvial: 1.00, red: 1.15, black: 0.90, sandy: 1.20, saline: 1.25, hilly: 1.10, clayey: 0.95, peaty: 1.05 };
+
+// Irrigation factor: drip delivers nutrients more precisely, so less is wasted
+const IRRIG_FACTOR = { flood: 1.00, drip: 0.75, sprinkler: 0.85, fertigation: 0.70, greenhouse: 0.50, mulching: 0.80, rainfed: 0.60 };
+
+// Subsidised govt price per 50 kg bag (April 2025, TN)
+const BAG_PRICE = { urea: 266, ssp: 400, mop: 1700 };
+const BAG_WT_KG = 50; // standard bag size
+
+function fmt(n) { return n.toLocaleString('en-IN'); }
+
+function calculate() {
+    const crop  = document.getElementById('cropSelect').value;
+    const soil  = document.getElementById('soilSelect').value;
+    const area  = Math.max(0.1, parseFloat(document.getElementById('areaInput').value) || 1);
+    const irrig = document.getElementById('irrigSelect').value;
+
+    const d   = DATA[crop];
+    const sf  = SOIL_FACTOR[soil];
+    const irf = IRRIG_FACTOR[irrig];
+
+    // Total pure nutrient required (kg)
+    const N = Math.round(d.n * area * sf * irf);
+    const P = Math.round(d.p * area * sf * irf);
+    const K = Math.round(d.k * area * sf * irf);
+
+    // kg of fertilizer product needed
+    const urea_kg = N / 0.46;
+    const ssp_kg  = P / 0.16;
+    const mop_kg  = K / 0.60;
+
+    // Number of bags (ceiling)
+    const urea_bags = Math.ceil(urea_kg / BAG_WT_KG);
+    const ssp_bags  = Math.ceil(ssp_kg  / BAG_WT_KG);
+    const mop_bags  = Math.ceil(mop_kg  / BAG_WT_KG);
+
+    // Costs
+    const uCost = urea_bags * BAG_PRICE.urea;
+    const sCost = ssp_bags  * BAG_PRICE.ssp;
+    const mCost = mop_bags  * BAG_PRICE.mop;
+
+    // Progress bar widths (relative to largest value)
+    const maxVal = Math.max(N, P, K, 1);
+    const nPct   = Math.round(N / maxVal * 100);
+    const pPct   = Math.round(P / maxVal * 100);
+    const kPct   = Math.round(K / maxVal * 100);
+
+    // Update DOM — NPK values
+    document.getElementById('nVal').textContent = N + ' kg';
+    document.getElementById('pVal').textContent = P + ' kg';
+    document.getElementById('kVal').textContent = K + ' kg';
+
+    // Update progress bars
+    document.getElementById('nBar').style.width = nPct + '%';
+    document.getElementById('pBar').style.width = pPct + '%';
+    document.getElementById('kBar').style.width = kPct + '%';
+
+    // Update fertilizer bag info
+    document.getElementById('nFert').textContent =
+        '\u2248 ' + Math.round(urea_kg) + ' kg Urea (' + urea_bags + ' bags \u00d7 50 kg)';
+    document.getElementById('pFert').textContent =
+        '\u2248 ' + Math.round(ssp_kg) + ' kg SSP (' + ssp_bags + ' bags \u00d7 50 kg)';
+    document.getElementById('kFert').textContent =
+        '\u2248 ' + Math.round(mop_kg) + ' kg MOP (' + mop_bags + ' bags \u00d7 50 kg)';
+
+    // Update costs
+    const uEl = document.getElementById('urea_cost'), sEl = document.getElementById('ssp_cost'), mEl = document.getElementById('mop_cost');
+    if(uEl) uEl.textContent = '\u20b9' + fmt(uCost);
+    if(sEl) sEl.textContent = '\u20b9' + fmt(sCost);
+    if(mEl) mEl.textContent = '\u20b9' + fmt(mCost);
+    document.getElementById('total_cost').textContent = '\u20b9' + fmt(uCost + sCost + mCost);
+
+    // Advisory
+    document.getElementById('advice').innerHTML =
+        '<strong style="color:var(--lime);">\ud83c\udf3f Application Advisory:</strong><br>' + d.advice;
+
+    // Logic Log
+    const logHTML = `
+        <div style="display:flex; justify-content:space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px;">
+            <span>[1] Base NPK (${crop})</span>
+            <span>N:${d.n} P:${d.p} K:${d.k} kg/acre</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px;">
+            <span>[2] Soil/Irrig Multipliers</span>
+            <span>Soil: &times;${sf.toFixed(2)} | Irrig: &times;${irf.toFixed(2)}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px;">
+            <span>[3] Adjusted for Area (${area} acres)</span>
+            <span>N:${N} P:${P} K:${K} kg total</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px;">
+            <span>[4] Cost Analysis</span>
+            <span>Urea:₹${fmt(uCost)} | SSP:₹${fmt(sCost)} | MOP:₹${fmt(mCost)}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between;">
+            <span>[5] Efficiency Buffer applied</span>
+            <span>Formula: Base &times; Area &times; Soil &times; Irrig</span>
+        </div>
+    `;
+    document.getElementById('logicLog').innerHTML = logHTML;
+}
+
+// Run on page load
+document.addEventListener('DOMContentLoaded', calculate);
+</script>
+{% endblock %}

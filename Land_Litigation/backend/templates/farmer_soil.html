@@ -1,0 +1,122 @@
+{% extends 'farmer_base.html' %}
+{% block title %}Soil Health & Crop Guide — AgriLitix{% endblock %}
+
+{% block content %}
+
+<div style="margin-bottom:2rem;">
+    <h1 style="font-size:2.4rem; font-weight:900; background:linear-gradient(90deg,#84cc16,#f59e0b); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">🌍 Soil Health &amp; Crop Intelligence</h1>
+    <p style="color:var(--muted); margin-top:6px;">AI-powered soil analysis and region-specific crop recommendations for Tamil Nadu</p>
+</div>
+
+<!-- ═══ SOIL HEALTH HERO ═══ -->
+<div class="card" style="position:relative; min-height:280px; margin-bottom:2rem; overflow:hidden;">
+    <img src="{{ url_for('static', filename='images/premium_soil_health_1775729244321.png') }}"
+         style="width:100%; height:280px; object-fit:cover;" alt="Soil Health">
+    <div style="position:absolute; inset:0; background:linear-gradient(90deg, rgba(5,46,22,0.95) 45%, rgba(5,46,22,0.5) 100%);"></div>
+    <div style="position:absolute; top:50%; left:2.5rem; transform:translateY(-50%); max-width:480px;">
+        <div style="color:var(--lime); font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:2px; margin-bottom:10px;">AI Quantum Soil Scanner — Active</div>
+        <h2 style="font-size:2rem; font-weight:900; margin-bottom:12px;">Soil Status: <span style="color:var(--lime);">Excellent</span></h2>
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px;">
+            {% for label, val, color in [('Nitrogen','78%','#4ade80'),('Phosphorus','65%','#60a5fa'),('Potassium','91%','#f59e0b')] %}
+            <div style="background:rgba(0,0,0,0.4); border-radius:10px; padding:12px; backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.1);">
+                <div style="font-size:0.75rem; color:rgba(255,255,255,0.6); margin-bottom:4px;">{{ label }}</div>
+                <div style="font-size:1.4rem; font-weight:800; color:{{ color }};">{{ val }}</div>
+                <div class="progress-bar" style="margin-top:6px;">
+                    <div class="progress-fill" style="width:{{ val }}; background:{{ color }};"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SOIL TYPE CARDS ═══ -->
+<h2 style="font-size:1.3rem; font-weight:800; margin-bottom:1.25rem;">🏔️ Soil Types in Your Registered Districts</h2>
+<div style="display:grid; grid-template-columns:repeat(4,1fr); gap:1.25rem; margin-bottom:2.5rem;">
+    {% set soils = [
+        ('🟤','Red Laterite','High iron, acidic pH 5.5–6.0. Excellent for tapioca, rubber, and cashew.','#f97316'),
+        ('⚫','Black Cotton','High clay content, water-retentive. Best for cotton, wheat, sorghum.','#8b5cf6'),
+        ('🟡','Alluvial','Rich in silt, moderate pH. Best for paddy, sugarcane, banana.','#f59e0b'),
+        ('🟫','Sandy Loam','Well-drained, light soil. Suitable for groundnut, millets, vegetables.','#84cc16')
+    ] %}
+    {% for emoji, name, desc, color in soils %}
+    <div class="stat-card" style="border-top:4px solid {{ color }};">
+        <div style="font-size:2rem; margin-bottom:8px;">{{ emoji }}</div>
+        <div style="font-weight:800; color:#fff; font-size:1rem; margin-bottom:6px;">{{ name }}</div>
+        <div style="font-size:0.82rem; color:var(--muted); line-height:1.5;">{{ desc }}</div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- ═══ CROP RECOMMENDATION TABLE ═══ -->
+<div class="card" style="margin-bottom:2rem;">
+    <div class="card-body" style="padding-bottom:0;">
+        <h2 style="font-size:1.3rem; font-weight:800; margin-bottom:0.5rem;">🌾 Recommended Crops for Tamil Nadu</h2>
+        <p style="color:var(--muted); font-size:0.9rem; margin-bottom:1.5rem;">Based on your district soil profile, rainfall data, and TNAU advisory 2024-25</p>
+    </div>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Crop</th>
+                <th>Season</th>
+                <th>Soil Suitability</th>
+                <th>Avg Yield / Acre</th>
+                <th>Market Price (₹/quintal)</th>
+                <th>AI Score</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% set crops = [
+                ('🌾 Samba Paddy','Oct – Jan','Alluvial / Clay','28-35 bags','₹2,183','98%','green'),
+                ('🌻 Groundnut','Jun – Sep','Red Laterite / Sandy','8-10 bags','₹5,550','91%','green'),
+                ('🍬 Sugarcane','Year Round','Alluvial / Black','35-40 tonnes','₹3,100/tonne','87%','green'),
+                ('🌿 Green Gram','Feb – May','Sandy Loam','4-6 bags','₹7,000','82%','amber'),
+                ('🌽 Maize','Jun – Sep','All Types','14-18 bags','₹2,000','79%','amber'),
+                ('🍌 Banana','Year Round','Alluvial','12-14 tonnes','₹800/dozen','94%','green'),
+                ('🌶️ Chilli','Oct – Feb','Sandy Loam','10-14 bags (dry)','₹12,000','76%','amber'),
+                ('🥜 Black-Eyed Pea','Jun – Aug','Sandy / Red','3-5 bags','₹5,400','80%','amber')
+            ] %}
+            {% for crop, season, soil, yield_val, price, score, badge in crops %}
+            <tr>
+                <td style="font-weight:700; color:#fff;">{{ crop }}</td>
+                <td style="color:var(--muted);">{{ season }}</td>
+                <td style="color:rgba(132,204,22,0.9); font-size:0.85rem;">{{ soil }}</td>
+                <td style="color:#fff;">{{ yield_val }}</td>
+                <td style="color:var(--amber); font-weight:700;">{{ price }}</td>
+                <td>
+                    {% if badge == 'green' %}
+                    <span class="badge-green">{{ score }}</span>
+                    {% else %}
+                    <span class="badge-amber">{{ score }}</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- ═══ SOIL TESTING ═══ -->
+<div class="card" style="margin-bottom:2rem;">
+    <div class="card-body">
+        <h2 style="font-size:1.2rem; font-weight:800; margin-bottom:1rem;">🔬 Free Government Soil Testing Centres — Tamil Nadu</h2>
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:1rem;">
+            {% for centre in [
+                ('Coimbatore','TNAU Main Campus, Coimbatore – 641 003','0422-661 1200'),
+                ('Madurai','Agricultureal Research Station, Kovilpatti Road','0452-243 7300'),
+                ('Chennai','Department of Agriculture, Chepauk HQ','044-2852 3400'),
+                ('Trichy','KVK Sirugamani, Trichy District','0431-252 2870'),
+                ('Salem','Agricultural Extension Centre, Salem – 636 001','0427-234 5600'),
+                ('Vellore','District Agriculture Office, Vellore','0416-222 3340')
+            ] %}
+            <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(132,204,22,0.2); border-radius:12px; padding:14px;">
+                <div style="color:var(--lime); font-weight:800; font-size:0.95rem; margin-bottom:4px;">📍 {{ centre[0] }}</div>
+                <div style="font-size:0.8rem; color:var(--muted); margin-bottom:4px; line-height:1.4;">{{ centre[1] }}</div>
+                <div style="font-size:0.8rem; color:var(--amber); font-weight:700;">📞 {{ centre[2] }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

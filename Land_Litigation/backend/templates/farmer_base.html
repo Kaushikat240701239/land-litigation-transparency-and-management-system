@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AgriLitix Premium{% endblock %} | Tamil Nadu Farmer Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --green:   #16a34a;
+            --lime:    #84cc16;
+            --amber:   #f59e0b;
+            --saffron: #f97316;
+            --red:     #dc2626;
+            --white:   #f8fafc;
+            --muted:   rgba(248,250,252,0.6);
+            --glass:   rgba(255,255,255,0.06);
+            --border:  rgba(255,255,255,0.12);
+            --shadow:  0 8px 32px rgba(0,0,0,0.4);
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #052e16 0%, #14532d 35%, #1a3a0a 65%, #0c1a05 100%);
+            min-height: 100vh;
+            color: var(--white);
+            display: flex;
+            /* overflow: hidden; Removed to allow page scrolling */
+        }
+
+        /* ── Animated background particles ── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 600px 400px at 80% 20%, rgba(22,163,74,0.15) 0%, transparent 70%),
+                radial-gradient(ellipse 400px 600px at 10% 80%, rgba(245,158,11,0.12) 0%, transparent 70%),
+                radial-gradient(ellipse 300px 300px at 50% 50%, rgba(132,204,22,0.08) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: 270px;
+            min-height: 100vh;
+            background: rgba(5,46,22,0.7);
+            backdrop-filter: blur(24px);
+            border-right: 1px solid rgba(22,163,74,0.25);
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            z-index: 100;
+            position: relative;
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.6rem;
+            font-weight: 900;
+            background: linear-gradient(90deg, #84cc16, #f59e0b, #f97316);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        .premium-tag {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: linear-gradient(90deg, #f59e0b, #f97316);
+            color: #fff;
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 6px 14px;
+            border-radius: 30px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            box-shadow: 0 0 20px rgba(245,158,11,0.5);
+            margin-bottom: 1.5rem;
+        }
+
+        .sidebar-section {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: rgba(132,204,22,0.6);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 10px 12px 4px;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--muted);
+            font-size: 0.95rem;
+            font-weight: 500;
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            transition: all 0.25s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar a:hover, .sidebar a.active {
+            background: linear-gradient(90deg, rgba(22,163,74,0.25), transparent);
+            border-left: 3px solid var(--lime);
+            color: #fff;
+            box-shadow: 0 0 12px rgba(132,204,22,0.2);
+        }
+
+        .sidebar a .icon { font-size: 1.1rem; width: 20px; text-align: center; }
+
+        .sidebar-logout {
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+        .sidebar-logout a {
+            color: #f87171 !important;
+        }
+
+        /* ── Main ── */
+        .main-content {
+            flex: 1;
+            padding: 2.5rem 3rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── Cards / Glass ── */
+        .card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            backdrop-filter: blur(12px);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .card-body { padding: 1.75rem; }
+
+        .stat-card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(12px);
+            box-shadow: var(--shadow);
+        }
+
+        /* ── Buttons ── */
+        .btn-gold {
+            background: linear-gradient(90deg, #f59e0b, #f97316);
+            color: #fff;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(245,158,11,0.4);
+        }
+        .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(245,158,11,0.5); }
+
+        .btn-green {
+            background: linear-gradient(90deg, #16a34a, #84cc16);
+            color: #fff;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(22,163,74,0.4);
+        }
+        .btn-green:hover { transform: translateY(-2px); }
+
+        /* ── Badges ── */
+        .badge-green { background: rgba(22,163,74,0.2); color: #4ade80; border: 1px solid rgba(22,163,74,0.4); padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; }
+        .badge-red   { background: rgba(220,38,38,0.2);  color: #f87171; border: 1px solid rgba(220,38,38,0.4);  padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; }
+        .badge-amber { background: rgba(245,158,11,0.2); color: #fbbf24; border: 1px solid rgba(245,158,11,0.4); padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; }
+
+        /* ── Table ── */
+        .data-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        .data-table th {
+            text-align: left;
+            padding: 12px 16px;
+            color: var(--lime);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid var(--border);
+        }
+        .data-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: var(--white);
+            vertical-align: middle;
+        }
+        .data-table tr:hover td { background: rgba(255,255,255,0.04); }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(132,204,22,0.3); border-radius: 3px; }
+
+        /* ── Progress bars ── */
+        .progress-bar { height: 8px; border-radius: 4px; background: rgba(255,255,255,0.1); overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 4px; transition: width 1s ease; }
+
+        /* ── Flash animations ── */
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 10px rgba(22,163,74,0.4); }
+            50%       { box-shadow: 0 0 25px rgba(22,163,74,0.8); }
+        }
+        .live-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #4ade80;
+            animation: pulse-glow 2s infinite;
+            display: inline-block;
+        }
+    </style>
+    {% block head %}{% endblock %}
+</head>
+<body>
+
+    <!-- ═══ SIDEBAR ═══ -->
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            🌾 AgriLitix
+        </div>
+        <div class="premium-tag">
+            ⭐ Premium — ₹2500
+        </div>
+
+        <div class="sidebar-section">Navigation</div>
+        <a href="{{ url_for('farmer_dashboard') }}" class="{% if request.endpoint == 'farmer_dashboard' %}active{% endif %}">
+            <span class="icon">🏡</span> Dashboard
+        </a>
+        <a href="{{ url_for('farmer_lands') }}" class="{% if request.endpoint == 'farmer_lands' %}active{% endif %}">
+            <span class="icon">🌿</span> My Lands
+        </a>
+        <a href="{{ url_for('farmer_soil') }}" class="{% if request.endpoint == 'farmer_soil' %}active{% endif %}">
+            <span class="icon">🌍</span> Soil Health
+        </a>
+        <a href="{{ url_for('farmer_schemes') }}" class="{% if request.endpoint == 'farmer_schemes' %}active{% endif %}">
+            <span class="icon">🏛️</span> Govt Schemes
+        </a>
+
+        <div class="sidebar-section" style="margin-top:1rem;">Premium Tools</div>
+        <a href="{{ url_for('farmer_weather') }}" class="{% if request.endpoint == 'farmer_weather' %}active{% endif %}">
+            <span class="icon">🌦️</span> Weather & Monsoon
+        </a>
+        <a href="{{ url_for('farmer_market') }}" class="{% if request.endpoint == 'farmer_market' %}active{% endif %}">
+            <span class="icon">📊</span> Market Prices
+        </a>
+        <a href="{{ url_for('farmer_calendar') }}" class="{% if request.endpoint == 'farmer_calendar' %}active{% endif %}">
+            <span class="icon">📅</span> Crop Calendar
+        </a>
+        <a href="{{ url_for('farmer_fertilizer') }}" class="{% if request.endpoint == 'farmer_fertilizer' %}active{% endif %}">
+            <span class="icon">🧮</span> Fertilizer Calc
+        </a>
+
+        <div class="sidebar-section" style="margin-top:1rem;">My Account</div>
+        <a href="{{ url_for('search_lands') }}">
+            <span class="icon">🔍</span> Search Lands
+        </a>
+        <a href="{{ url_for('my_cases') }}">
+            <span class="icon">⚖️</span> My Cases
+        </a>
+
+        <div class="sidebar-logout">
+            <a href="{{ url_for('logout') }}">
+                <span class="icon">🚪</span> Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- ═══ MAIN CONTENT ═══ -->
+    <div class="main-content">
+        <!-- 🔔 FLASH MESSAGES -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div style="background:rgba(255,255,255,0.05); backdrop-filter:blur(10px); padding:1rem 1.5rem; border-radius:12px; margin-bottom:2rem; border-left:4px solid {% if category=='error' %}#f87171{% elif category=='success' %}#4ade80{% else %}#fbbf24{% endif %}; display:flex; align-items:center; gap:12px; box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+                        <span>{% if category=='error' %}❌{% elif category=='success' %}✅{% else %}🔔{% endif %}</span>
+                        <span style="font-weight:600; font-size:0.95rem;">{{ message }}</span>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+</body>
+</html>

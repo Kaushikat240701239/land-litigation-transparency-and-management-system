@@ -1,0 +1,54 @@
+{% extends 'admin_base.html' %}
+{% block title %}Land History{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+    <h2>Land Ownership History</h2>
+    <p style="color: var(--text-muted);">View the chain of ownership for verified land parcels.</p>
+</div>
+
+<!-- Search Bar -->
+<div class="glass" style="padding: 1.5rem; margin-bottom: 2rem;">
+    <form method="GET" action="{{ url_for('history_page') }}" style="display: flex; gap: 1rem;">
+        <input type="text" name="land_id" class="form-control" placeholder="Search by Land ID (e.g., LND-425)" value="{{ search_term }}" style="max-width: 400px;">
+        <button type="submit" class="btn btn-primary" style="width: auto;">Search History</button>
+        {% if search_term %}
+        <a href="{{ url_for('history_page') }}" class="btn" style="border: 1px solid var(--border-color); color: var(--text-main);">Clear</a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Timeline representation -->
+<div class="glass table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Record ID</th>
+                <th>Land ID</th>
+                <th>Owner Name</th>
+                <th>Date of Transfer</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in data %}
+            <tr>
+                <td style="color: var(--text-muted);">#HL-{{ record.id }}</td>
+                <td style="font-weight: 600; color: var(--secondary);">{{ record.land_id }}</td>
+                <td>{{ record.owner_name }}</td>
+                <td>
+                    <span class="badge" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-color);">
+                        {{ record.transfer_date }}
+                    </span>
+                </td>
+            </tr>
+            {% endfor %}
+
+            {% if not data %}
+            <tr>
+                <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 2rem;">No history found. Try searching for a different Land ID.</td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

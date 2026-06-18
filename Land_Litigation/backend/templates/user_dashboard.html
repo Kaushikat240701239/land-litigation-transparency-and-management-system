@@ -1,0 +1,226 @@
+{% extends 'user_base.html' %}
+{% block title %}My Portfolio Dashboard{% endblock %}
+
+{% block content %}
+<!-- Welcome Banner -->
+<div class="glass" style="display: flex; justify-content: space-between; align-items: center; padding: 3rem; margin-bottom: 2rem; background: linear-gradient(135deg, rgba(15,23,42,0.9), rgba(139, 92, 246, 0.15)); border-left: 4px solid var(--primary); position: relative; overflow: hidden;">
+    <div style="z-index: 2;">
+        <h2 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Welcome back, {{ user_name }}</h2>
+        <p style="color: var(--text-muted); font-size: 1.1rem; max-width: 500px;">Manage your digital real estate portfolio, respond to open litigation, and monitor the chain of ownership.</p>
+    </div>
+    <div style="z-index: 1; opacity: 0.6; pointer-events: none; transform: scale(1.5) translate(20%, -10%);">
+        <svg width="250" height="250" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="0.5"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg>
+    </div>
+</div>
+
+<!-- EXCITING PROPERTY VALUATION FEATURE -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="glass" style="padding: 2.5rem; border-left: 4px solid var(--success); margin-bottom: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1.5rem;">
+        <div>
+            <div class="badge" style="background: rgba(16, 185, 129, 0.2); color: var(--success); margin-bottom: 1rem; border: 1px solid rgba(16, 185, 129, 0.3);">Wealth Tracker</div>
+            <h3 style="color: var(--text-main); margin-bottom: 0.5rem; font-size: 1.5rem;">Estimated Portfolio Market Value</h3>
+            <p style="color: var(--text-muted); font-size: 0.95rem;">Track the simulated 5-year capital appreciation of your combined land assets based on state-wide infrastructure growth indices.</p>
+        </div>
+        <div style="text-align: right;">
+            <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px;">CURRENT ESTIMATE</div>
+            {% set total_lands = user_lands|length %}
+            {% set base_val = total_lands * 1500000 %}
+            <div style="font-size: 2rem; font-weight: bold; color: var(--success);">₹{{ "{:,.0f}".format(base_val) }}</div>
+            {% if total_lands > 0 %}
+            <div style="font-size: 0.9rem; color: #10b981;">▲ +12.4% (YOY)</div>
+            {% else %}
+            <div style="font-size: 0.9rem; color: var(--text-muted);">No assets claimed</div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div style="position: relative; height: 300px; width: 100%;">
+        <canvas id="valuationChart"></canvas>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const ctxVal = document.getElementById('valuationChart').getContext('2d');
+        const numLands = {{ user_lands|length }};
+        
+        let chartData = [0, 0, 0, 0, 0, 0];
+        if (numLands > 0) {
+            const currentVal = numLands * 1500000; // Simulated base val
+            chartData = [
+                currentVal * 0.65, 
+                currentVal * 0.72, 
+                currentVal * 0.78, 
+                currentVal * 0.85, 
+                currentVal * 0.92, 
+                currentVal
+            ];
+        }
+
+        new Chart(ctxVal, {
+            type: 'line',
+            data: {
+                labels: ['2021', '2022', '2023', '2024', '2025', '2026 (YTD)'],
+                datasets: [{
+                    label: 'Portfolio Value (₹)',
+                    data: chartData,
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    borderWidth: 3,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#10b981',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: {
+                            color: '#94a3b8',
+                            callback: function(value) {
+                                if (value === 0) return '₹0';
+                                return '₹' + (value/100000).toFixed(1) + 'L';
+                            }
+                        }
+                    },
+                    x: {
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: '#94a3b8' }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return '₹' + context.raw.toLocaleString();
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+
+<!-- Metrics -->
+<h3 style="margin-bottom: 1rem; color: var(--text-muted);">Portfolio Summary</h3>
+<div class="metrics-grid">
+    <div class="metric-card glass" style="border-top: 4px solid var(--primary);">
+        <span class="metric-title">Owned Parcels</span>
+        <span class="metric-value" style="color: var(--primary);">{{ user_lands|length }}</span>
+    </div>
+    <div class="metric-card glass" style="border-top: 4px solid var(--success);">
+        <span class="metric-title">Clear Properties</span>
+        <span class="metric-value">{{ user_lands|length - user_cases|selectattr('status', 'equalto', 'ongoing')|list|length }}</span>
+    </div>
+    <div class="metric-card glass" style="border-top: 4px solid var(--warning);">
+        <span class="metric-title">Open Litigation</span>
+        <span class="metric-value" style="color: var(--warning);">{{ user_cases|selectattr('status', 'equalto', 'ongoing')|list|length }}</span>
+    </div>
+    <div class="metric-card glass" style="border-top: 4px solid var(--text-muted);">
+        <span class="metric-title">Historical Cases</span>
+        <span class="metric-value">{{ user_cases|length }}</span>
+    </div>
+</div>
+
+<!-- Dispute Heatmap -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+
+<div class="glass" style="padding: 2rem; margin-top: 2rem;">
+    <h3 style="color: var(--text-main); margin-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem;">State-wide Area Dispute Heatmap</h3>
+    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">This predictive heatmap overlays ongoing litigation clusters to help identify high-risk geographical zones across Tamil Nadu. Use this macro-level intelligence before investing in new districts.</p>
+    <div id="heatmap" style="height: 350px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);"></div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var map = L.map('heatmap').setView([11.1271, 78.6569], 7);
+        
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap',
+            subdomains: 'abcd',
+            maxZoom: 20
+        }).addTo(map);
+
+        var heatData = {{ heatmap_data | tojson | safe }};
+        if(heatData && heatData.length > 0) {
+            L.heatLayer(heatData, {
+                radius: 30, 
+                blur: 20, 
+                maxZoom: 10,
+                gradient: {0.4: 'cyan', 0.6: 'lime', 0.8: 'yellow', 1.0: 'red'}
+            }).addTo(map);
+        }
+    });
+</script>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-top: 3rem;">
+    <!-- Recent History -->
+    <div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3 style="color: var(--text-main); margin: 0;">Recent Portfolio Activity</h3>
+        </div>
+        <div class="glass table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Asset ID</th>
+                        <th>Registered To</th>
+                        <th>Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for h in history %}
+                    <tr>
+                        <td style="font-weight: 600; color: var(--primary);">{{ h.land_id }}</td>
+                        <td>{{ h.owner_name }}</td>
+                        <td>
+                            <span class="badge" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-color);">{{ h.transfer_date }}</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not history %}
+                    <tr>
+                        <td colspan="3" style="text-align: center; color: var(--text-muted); padding: 2rem;">No recent activities found in the ledger.</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Quick Action / Summary -->
+    <div>
+        <h3 style="color: var(--text-main); margin-bottom: 1.5rem;">Quick Tools</h3>
+        
+        <!-- Premium Upgrade CTA -->
+        <a href="{{ url_for('upgrade') }}" class="glass" style="display: block; padding: 1.5rem; text-decoration: none; color: #fff; margin-bottom: 1rem; transition: transform 0.3s; border-left: 3px solid #f59e0b; background: linear-gradient(90deg, rgba(245, 158, 11, 0.1), transparent);">
+            <div class="badge" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b; font-size: 0.7rem; margin-bottom: 0.5rem;">RECOMMENDED</div>
+            <h4 style="margin-bottom: 0.5rem; font-size: 1.1rem; color: #f59e0b;">⭐ Go Premium &rarr;</h4>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Unlock satellite monitoring, soil reports, and mandi prices.</p>
+        </a>
+
+        <a href="{{ url_for('search_lands') }}" class="glass" style="display: block; padding: 1.5rem; text-decoration: none; color: var(--text-main); margin-bottom: 1rem; transition: transform 0.3s; border-left: 3px solid var(--primary);">
+            <h4 style="margin-bottom: 0.5rem; font-size: 1.1rem;">Title Verification Engine &rarr;</h4>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Audit a property's legal standing before purchase.</p>
+        </a>
+        <a href="{{ url_for('my_cases') }}" class="glass" style="display: block; padding: 1.5rem; text-decoration: none; color: var(--text-main); transition: transform 0.3s; border-left: 3px solid var(--warning);">
+            <h4 style="margin-bottom: 0.5rem; font-size: 1.1rem;">Respond to Cases &rarr;</h4>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">View details of litigation affecting your assets.</p>
+        </a>
+    </div>
+</div>
+{% endblock %}

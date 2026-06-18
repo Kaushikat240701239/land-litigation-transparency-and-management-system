@@ -1,0 +1,2 @@
+id,name,email,password,phone,is_verified,role
+1,admin,admin@gmail.com,123,9000000000,1,admin

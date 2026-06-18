@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}User Portal{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        :root {
+            --primary: #8b5cf6; /* Purple Theme for Users */
+            --secondary: #3b82f6;
+        }
+        .sidebar a:hover, .sidebar a.active {
+            background: linear-gradient(90deg, rgba(139, 92, 246, 0.2), transparent);
+            border-left: 3px solid var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Language Support -->
+    <div style="position: absolute; top: 1.5rem; right: 2rem; z-index: 1000;">
+        <div id="google_translate_element"></div>
+    </div>
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({pageLanguage: 'en', includedLanguages: 'ta,hi,en', layout: google.translate.TranslateElement.InlineLayout.SIMPLE}, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <!-- Sidebar -->
+    <div class="sidebar glass">
+        <div class="sidebar-logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg>
+            LandLitix User
+        </div>
+        <a href="{{ url_for('user_dashboard') }}" class="{% if request.endpoint == 'user_dashboard' %}active{% endif %}">
+            Dashboard
+        </a>
+        <a href="{{ url_for('my_lands') }}" class="{% if request.endpoint == 'my_lands' %}active{% endif %}">
+            My Lands
+        </a>
+        <a href="{{ url_for('my_cases') }}" class="{% if request.endpoint == 'my_cases' %}active{% endif %}">
+            My Cases
+        </a>
+        <a href="{{ url_for('search_lands') }}" class="{% if request.endpoint == 'search_lands' %}active{% endif %}">
+            Search Lands
+        </a>
+        <a href="{{ url_for('upgrade') }}" style="color: #f59e0b; font-weight: 800;">
+            ⭐ Upgrade to Premium
+        </a>
+        <a href="{{ url_for('logout') }}" style="margin-top: auto; color: var(--danger);">
+            Logout
+        </a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- 🔔 FLASH MESSAGES -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="glass" style="padding: 1rem; margin-bottom: 2rem; border-left: 4px solid {% if category == 'error' %}var(--danger){% elif category == 'success' %}var(--success){% else %}var(--primary){% endif %}; color: #fff;">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Legal AI Chatbot Simulated UI -->
+    <div id="ai-chatbot" class="glass" style="position: fixed; bottom: 20px; right: 20px; width: 320px; border-radius: 12px; border: 1px solid rgba(139, 92, 246, 0.5); z-index: 1000; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+        <div style="background: var(--primary); padding: 1rem; font-weight: bold; display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleChat()">
+            <span>🤖 Legal AI Assistant</span>
+            <span id="chat-toggle-icon">−</span>
+        </div>
+        <div id="chat-body" style="height: 250px; background: rgba(0,0,0,0.8); display: flex; flex-direction: column;">
+            <div id="chat-messages" style="flex-grow: 1; padding: 1rem; overflow-y: auto; font-size: 0.85rem; display: flex; flex-direction: column; gap: 10px;">
+                <div style="background: rgba(139, 92, 246, 0.2); border: 1px solid var(--primary); padding: 8px; border-radius: 8px; max-width: 85%; align-self: flex-start;">
+                    Hello! I'm your Legal Chatbot. Do you need help verifying an EC or applying for PM-Kisan registration?
+                </div>
+            </div>
+            <div style="display: flex; border-top: 1px solid rgba(255,255,255,0.1);">
+                <input type="text" id="chat-input" placeholder="Type your query..." style="flex-grow: 1; padding: 10px; border: none; background: transparent; color: white; outline: none; font-size: 0.85rem;" onkeypress="if(event.key === 'Enter') sendChat()">
+                <button onclick="sendChat()" style="background: var(--primary); color: white; border: none; padding: 0 15px; cursor: pointer; font-weight: bold;">Send</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        function toggleChat() {
+            const body = document.getElementById('chat-body');
+            const icon = document.getElementById('chat-toggle-icon');
+            if(body.style.display === 'none') {
+                body.style.display = 'flex';
+                icon.innerText = '−';
+            } else {
+                body.style.display = 'none';
+                icon.innerText = '+';
+            }
+        }
+        function sendChat() {
+            const input = document.getElementById('chat-input');
+            const msg = input.value.trim();
+            if(!msg) return;
+            
+            const msgsDiv = document.getElementById('chat-messages');
+            
+            // Add user msg
+            const uDiv = document.createElement('div');
+            uDiv.style = "background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255,255,255,0.2); padding: 8px; border-radius: 8px; max-width: 85%; align-self: flex-end;";
+            uDiv.innerText = msg;
+            msgsDiv.appendChild(uDiv);
+            
+            input.value = '';
+            msgsDiv.scrollTop = msgsDiv.scrollHeight;
+            
+            // Add bot reply
+            setTimeout(() => {
+                const bDiv = document.createElement('div');
+                bDiv.style = "background: rgba(139, 92, 246, 0.2); border: 1px solid var(--primary); padding: 8px; border-radius: 8px; max-width: 85%; align-self: flex-start;";
+                bDiv.innerHTML = "<em>Analyzing local registry...</em> Based on standard procedure, I recommend scheduling a Sub-Registrar appointment or reviewing your title's Risk Score out of 100 on the dashboard.";
+                msgsDiv.appendChild(bDiv);
+                msgsDiv.scrollTop = msgsDiv.scrollHeight;
+            }, 800);
+        }
+    </script>
+</body>
+</html>

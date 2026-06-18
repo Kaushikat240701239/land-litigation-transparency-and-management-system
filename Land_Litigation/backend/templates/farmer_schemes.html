@@ -1,0 +1,140 @@
+{% extends 'farmer_base.html' %}
+{% block title %}Govt Schemes — AgriLitix{% endblock %}
+
+{% block content %}
+
+<div style="margin-bottom:2rem;">
+    <h1 style="font-size:2.4rem; font-weight:900; background:linear-gradient(90deg,#f97316,#f59e0b,#84cc16); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">🏛️ Government Schemes for Tamil Nadu Farmers</h1>
+    <p style="color:var(--muted); margin-top:6px;">All active Central &amp; State schemes you are eligible to claim. Verified and updated April 2025.</p>
+</div>
+
+<!-- ═══ HERO BANNER ═══ -->
+<div class="card" style="position:relative; min-height:200px; margin-bottom:2.5rem; overflow:hidden;">
+    <img src="{{ url_for('static', filename='images/govt_scheme_banner_1775730526538.png') }}"
+         style="width:100%; height:200px; object-fit:cover; object-position:center top;" alt="Govt Schemes">
+    <div style="position:absolute; inset:0; background:linear-gradient(90deg, rgba(5,46,22,0.95) 40%, rgba(5,46,22,0.5) 100%);"></div>
+    <div style="position:absolute; top:50%; left:2.5rem; transform:translateY(-50%);">
+        <div style="color:var(--amber); font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:2px; margin-bottom:8px;">🇮🇳 Indian Government — Tamil Nadu Farmer Welfare</div>
+        <div style="font-size:2rem; font-weight:900; color:#fff; margin-bottom:8px;">₹6 Lakh+ in Benefits Available to You</div>
+        <div style="display:flex; gap:1rem;">
+            <span class="badge-green">6 Active Schemes</span>
+            <span class="badge-amber">3 New in 2025</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ CENTRAL SCHEMES ═══ -->
+<h2 style="font-size:1.3rem; font-weight:800; margin-bottom:1.25rem; color:#fff;">🇮🇳 Central Government Schemes</h2>
+<div style="display:grid; grid-template-columns:repeat(2,1fr); gap:1.5rem; margin-bottom:2.5rem;">
+
+    {% set central = [
+        (
+            'Pradhan Mantri Kisan Samman Nidhi (PM-KISAN)',
+            '₹6,000 / year',
+            'Direct income support of ₹2,000 every 4 months to all small and marginal farmers. Deposited directly to bank account via DBT.',
+            ['Indian citizen & farmer','Land in govt records','Valid Aadhaar','Bank account linked'],
+            'pmkisan.gov.in',
+            '#4ade80','rgba(74,222,128,0.2)'
+        ),
+        (
+            'Pradhan Mantri Fasal Bima Yojana (PMFBY)',
+            'Up to 100% crop loss coverage',
+            'Comprehensive crop insurance covering natural calamities, pests, diseases. Premium paid by government for small farmers.',
+            ['Loanee & non-loanee farmers','Any notified crop','Account + land records','Register before sowing'],
+            'pmfby.gov.in',
+            '#60a5fa','rgba(96,165,250,0.2)'
+        ),
+        (
+            'PM Krishi Sinchayee Yojana (PMKSY)',
+            '75% subsidy on drip irrigation',
+            'Promotes micro-irrigation to maximise water use. Provides drip and sprinkler systems at heavily subsidised rates.',
+            ['Minimum 0.5 acre land','Owns or leases land','Priority to SC/ST/women','Apply via district office'],
+            'pmksy.gov.in',
+            '#f59e0b','rgba(245,158,11,0.2)'
+        ),
+        (
+            'Kisan Credit Card (KCC)',
+            'Credit up to ₹3 Lakh @ 4% interest',
+            'Easy short-term credit for farm inputs — seeds, fertilisers, pesticides — with flexible repayment up to 5 years.',
+            ['Must be a farmer','Land record required','Any nationalised bank','No collateral under ₹1.6L'],
+            'pmkisan.gov.in/kcc',
+            '#a78bfa','rgba(167,139,250,0.2)'
+        )
+    ] %}
+
+    {% for name, benefit, desc, eligibility, link, color, colorbg in central %}
+    <div class="card" style="border-left:5px solid {{ color }}; transition:transform 0.2s, box-shadow 0.2s;"
+         onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 20px 40px rgba(0,0,0,0.5)'"
+         onmouseout="this.style.transform=''; this.style.boxShadow=''">
+        <div class="card-body">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+                <h3 style="font-size:1.05rem; font-weight:800; color:#fff; line-height:1.3; flex:1; padding-right:12px;">{{ name }}</h3>
+                <span style="background:{{ colorbg }}; color:{{ color }}; border:1px solid {{ color }}; padding:5px 12px; border-radius:20px; font-weight:800; font-size:0.8rem; white-space:nowrap;">{{ benefit }}</span>
+            </div>
+            <p style="color:var(--muted); font-size:0.88rem; line-height:1.6; margin-bottom:1rem;">{{ desc }}</p>
+            <div style="margin-bottom:1rem;">
+                <div style="font-size:0.75rem; font-weight:700; text-transform:uppercase; color:{{ color }}; letter-spacing:1px; margin-bottom:6px;">Eligibility</div>
+                <ul style="list-style:none; display:flex; flex-direction:column; gap:4px;">
+                    {% for item in eligibility %}
+                    <li style="font-size:0.82rem; color:rgba(255,255,255,0.75); display:flex; align-items:center; gap:6px;">
+                        <span style="color:{{ color }};">✓</span> {{ item }}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <a href="https://{{ link }}" target="_blank" class="btn-gold" style="text-decoration:none; display:inline-block; font-size:0.85rem;">Apply Now → {{ link }}</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- ═══ TN STATE SCHEMES ═══ -->
+<h2 style="font-size:1.3rem; font-weight:800; margin-bottom:1.25rem; color:#fff;">🌾 Tamil Nadu State Government Schemes</h2>
+<div style="display:grid; grid-template-columns:repeat(3,1fr); gap:1.25rem; margin-bottom:2.5rem;">
+    {% set state_schemes = [
+        ('🌱','Chief Minister Agri Tech Scheme','Free soil testing + agronomist consultation for all TN farmers. Monthly advisory via SMS.','All TN farmers','Free'),
+        ('💧','TN Micro Irrigation Scheme','Drip irrigation support for small and marginal farmers. Additional 25% top-up over PMKSY.','Less than 5 acres landholding','Up to 90% subsidy'),
+        ('🐄','Pasumpaduthal Scheme','Cattle loans at 0% interest for first 2 years to promote integrated farming.','Farmer and livestock owner','Rs 1 Lakh at 0% interest')
+    ] %}
+    {% for icon, name, desc, elig, val in state_schemes %}
+    <div class="stat-card" style="border-top:4px solid var(--saffron);">
+        <div style="font-size:2rem; margin-bottom:10px;">{{ icon }}</div>
+        <div style="font-weight:800; font-size:1rem; color:#fff; margin-bottom:6px;">{{ name }}</div>
+        <div style="font-size:0.82rem; color:var(--muted); margin-bottom:12px; line-height:1.5;">{{ desc }}</div>
+        <div style="background:rgba(249,115,22,0.15); border:1px solid rgba(249,115,22,0.3); border-radius:8px; padding:8px 12px; font-size:0.82rem;">
+            <span style="color:var(--saffron); font-weight:700;">Eligibility:</span> <span style="color:rgba(255,255,255,0.8);">{{ elig }}</span>
+        </div>
+        <div style="margin-top:8px; font-size:1rem; font-weight:800; color:var(--lime);">{{ val }}</div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- ═══ HELPLINE TABLE ═══ -->
+<div class="card" style="margin-bottom:2rem;">
+    <div class="card-body">
+        <h2 style="font-size:1.2rem; font-weight:800; margin-bottom:1rem;">📞 Farmer Helplines &amp; Contact Centers</h2>
+        <table class="data-table">
+            <thead>
+                <tr><th>Service</th><th>Number</th><th>Hours</th><th>Language</th></tr>
+            </thead>
+            <tbody>
+                {% for row in [
+                    ('PM-KISAN Helpline','155261','Mon–Sat, 9AM–6PM','Hindi, English'),
+                    ('TNAU Kisan Call Centre','1800-180-1551','All days, 6AM–10PM','Tamil, English'),
+                    ('PMFBY Crop Insurance','14447','Mon–Sat, 9AM–6PM','Tamil, Hindi, English'),
+                    ('Tamil Nadu Agri Dept','1800-425-1144','All days, 8AM–8PM','Tamil'),
+                    ('Kisan Credit Card (SBI)','1800-11-2211','24x7','Tamil, Hindi, English')
+                ] %}
+                <tr>
+                    <td style="font-weight:700;">{{ row[0] }}</td>
+                    <td style="color:var(--lime); font-weight:800; font-size:1.1rem;">{{ row[1] }}</td>
+                    <td style="color:var(--muted);">{{ row[2] }}</td>
+                    <td><span class="badge-amber">{{ row[3] }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

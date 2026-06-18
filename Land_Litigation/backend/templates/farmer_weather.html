@@ -1,0 +1,124 @@
+{% extends 'farmer_base.html' %}
+{% block title %}Weather & Monsoon — AgriLitix{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:2rem;">
+    <h1 style="font-size:2.4rem; font-weight:900; background:linear-gradient(90deg,#38bdf8,#84cc16); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">🌦️ Weather & Monsoon Forecast</h1>
+    <p style="color:var(--muted); margin-top:6px;">District-wise rainfall forecast and agricultural weather advisory — Tamil Nadu, April 2025</p>
+</div>
+
+<!-- ═══ TODAY HERO ═══ -->
+<div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1.5rem; margin-bottom:2rem;">
+    <div style="grid-column:1/2; background:linear-gradient(135deg,#0c4a6e,#075985,#0369a1); border-radius:20px; padding:2rem; position:relative; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,0.4);">
+        <div style="font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:2px; color:#bae6fd; margin-bottom:8px;">Today — Chennai Region</div>
+        <div style="display:flex; align-items:flex-start; gap:1rem;">
+            <div style="font-size:5rem; line-height:1;">🌤️</div>
+            <div>
+                <div style="font-size:3.5rem; font-weight:900; color:#fff; line-height:1;">33<span style="font-size:1.5rem;">°C</span></div>
+                <div style="color:#bae6fd; font-size:1rem; margin-top:4px;">Partly Cloudy</div>
+                <div style="color:#93c5fd; font-size:0.85rem;">Humidity: 78% &nbsp;|&nbsp; Wind: 12 km/h</div>
+            </div>
+        </div>
+        <!-- Decorative circle -->
+        <div style="position:absolute; right:-30px; bottom:-30px; width:160px; height:160px; border-radius:50%; background:rgba(255,255,255,0.05);"></div>
+        <div style="position:absolute; right:20px; bottom:20px; width:80px; height:80px; border-radius:50%; background:rgba(255,255,255,0.08);"></div>
+    </div>
+
+    <div style="background:linear-gradient(135deg,#14532d,#15803d); border-radius:20px; padding:2rem; box-shadow:0 10px 30px rgba(0,0,0,0.4);">
+        <div style="font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:2px; color:#86efac; margin-bottom:16px;">Monsoon Status 2025</div>
+        <div style="font-size:2rem; font-weight:900; color:#4ade80; margin-bottom:8px;">Northeast Monsoon</div>
+        <div style="color:rgba(255,255,255,0.8); font-size:0.9rem; line-height:1.6; margin-bottom:12px;">Expected onset: <strong style="color:#fde68a;">Oct 15, 2025</strong><br>Forecast: <strong style="color:#4ade80;">Normal to Above Normal</strong></div>
+        <div style="background:rgba(255,255,255,0.1); border-radius:10px; padding:10px 14px;">
+            <div style="font-size:0.75rem; color:#86efac; margin-bottom:6px;">Seasonal Rainfall Forecast</div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width:82%; background:linear-gradient(90deg,#4ade80,#a3e635);"></div>
+            </div>
+            <div style="color:#fff; font-size:0.85rem; margin-top:4px; font-weight:700;">82% — Above Normal Expected</div>
+        </div>
+    </div>
+
+    <div style="background:linear-gradient(135deg,#7c2d12,#9a3412); border-radius:20px; padding:2rem; box-shadow:0 10px 30px rgba(0,0,0,0.4);">
+        <div style="font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:2px; color:#fed7aa; margin-bottom:16px;">Agricultural Advisory</div>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+            {% for alert, icon, color in [
+                ('Ideal sowing window: 15 Apr – 10 May','🌱','#4ade80'),
+                ('Avoid irrigation Tue-Thu (rain expected)','💧','#60a5fa'),
+                ('Pest alert: Stem borer risk — High','⚠️','#facc15'),
+                ('Dry spell forecast: 3 days post Apr 14','☀️','#f97316')
+            ] %}
+            <div style="display:flex; align-items:flex-start; gap:10px; background:rgba(255,255,255,0.08); border-radius:8px; padding:8px 12px;">
+                <span style="font-size:1rem;">{{ icon }}</span>
+                <span style="font-size:0.82rem; color:rgba(255,255,255,0.85); line-height:1.4;">{{ alert }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- ═══ 7-DAY FORECAST ═══ -->
+<div class="card" style="margin-bottom:2rem;">
+    <div class="card-body">
+        <h2 style="font-size:1.2rem; font-weight:800; margin-bottom:1.5rem;">📅 7-Day Forecast — Cauvery Delta Region</h2>
+        <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:1rem;">
+            {% set days = [
+                ('Wed','10 Apr','⛅','34°','26°','20%'),
+                ('Thu','11 Apr','🌧️','29°','24°','75%'),
+                ('Fri','12 Apr','⛈️','28°','23°','90%'),
+                ('Sat','13 Apr','🌦️','30°','24°','55%'),
+                ('Sun','14 Apr','🌤️','33°','25°','15%'),
+                ('Mon','15 Apr','☀️','35°','26°','5%'),
+                ('Tue','16 Apr','⛅','34°','25°','25%')
+            ] %}
+            {% for day, date, icon, hi, lo, rain in days %}
+            <div style="background:rgba(255,255,255,0.05); border-radius:14px; padding:1rem; text-align:center; border:1px solid rgba(255,255,255,0.08); transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+                <div style="font-weight:700; color:var(--lime); font-size:0.9rem;">{{ day }}</div>
+                <div style="font-size:0.72rem; color:var(--muted); margin-bottom:8px;">{{ date }}</div>
+                <div style="font-size:2rem; margin-bottom:8px;">{{ icon }}</div>
+                <div style="font-size:1rem; font-weight:800; color:#fff;">{{ hi }}</div>
+                <div style="font-size:0.85rem; color:var(--muted);">{{ lo }}</div>
+                <div style="margin-top:8px; background:rgba(56,189,248,0.2); border-radius:6px; padding:3px 6px; font-size:0.75rem; color:#7dd3fc; font-weight:700;">💧 {{ rain }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- ═══ DISTRICT TABLE ═══ -->
+<div class="card" style="margin-bottom:2rem;">
+    <div class="card-body" style="padding-bottom:0;">
+        <h2 style="font-size:1.2rem; font-weight:800; margin-bottom:1.25rem;">🗺️ District-wise Rainfall Status — Tamil Nadu</h2>
+    </div>
+    <table class="data-table">
+        <thead><tr><th>District</th><th>Today's Temp</th><th>Rainfall (mm)</th><th>Humidity</th><th>Crop Condition</th><th>Alert</th></tr></thead>
+        <tbody>
+            {% for row in [
+                ('Thanjavur','32°C / 24°C','8.4 mm','82%','Excellent','Normal'),
+                ('Coimbatore','34°C / 26°C','0.0 mm','65%','Good','Dry Spell'),
+                ('Madurai','35°C / 27°C','0.0 mm','60%','Moderate','Heat Wave'),
+                ('Trichy','33°C / 25°C','3.2 mm','75%','Good','Normal'),
+                ('Salem','33°C / 25°C','1.5 mm','70%','Good','Normal'),
+                ('Vellore','34°C / 26°C','0.0 mm','63%','Moderate','Dry Spell'),
+                ('Kancheepuram','31°C / 24°C','12.1 mm','85%','Excellent','Heavy Rain'),
+                ('Tirunelveli','30°C / 23°C','18.6 mm','88%','Excellent','Heavy Rain')
+            ] %}
+            <tr>
+                <td style="font-weight:700; color:#fff;">{{ row[0] }}</td>
+                <td style="color:#fbbf24;">{{ row[1] }}</td>
+                <td style="color:#60a5fa;">{{ row[2] }}</td>
+                <td>{{ row[3] }}</td>
+                <td>
+                    {% if row[4] == 'Excellent' %}<span class="badge-green">{{ row[4] }}</span>
+                    {% elif row[4] == 'Good' %}<span class="badge-amber">{{ row[4] }}</span>
+                    {% else %}<span class="badge-red">{{ row[4] }}</span>{% endif %}
+                </td>
+                <td>
+                    {% if 'Heavy' in row[5] %}<span class="badge-red">{{ row[5] }}</span>
+                    {% elif row[5] == 'Normal' %}<span class="badge-green">{{ row[5] }}</span>
+                    {% else %}<span class="badge-amber">{{ row[5] }}</span>{% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

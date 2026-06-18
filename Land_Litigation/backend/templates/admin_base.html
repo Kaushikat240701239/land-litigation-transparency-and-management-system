@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Panel{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar glass">
+        <div class="sidebar-logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg>
+            LandLitix Admin
+        </div>
+        <a href="{{ url_for('admin_dashboard') }}" class="{% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
+            Dashboard
+        </a>
+        <a href="{{ url_for('add_case_page') }}" class="{% if request.endpoint == 'add_case_page' %}active{% endif %}">
+            Add Case
+        </a>
+        <a href="{{ url_for('update_case_page') }}" class="{% if request.endpoint == 'update_case_page' %}active{% endif %}">
+            Update Case
+        </a>
+        <a href="{{ url_for('update_owner_page') }}" class="{% if request.endpoint == 'update_owner_page' %}active{% endif %}">
+            Update Owner
+        </a>
+
+        <a href="{{ url_for('logout') }}" style="margin-top: auto; color: var(--danger);">
+            Logout
+        </a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- 🔔 FLASH MESSAGES -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="glass" style="padding: 1rem; margin-bottom: 2rem; border-left: 4px solid {% if category == 'error' %}var(--danger){% elif category == 'success' %}var(--success){% else %}var(--primary){% endif %}; color: #fff;">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+</body>
+</html>
